@@ -5,6 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BLM Brasil — Brasil Legends Motorsport</title>
 
+  <link rel="icon" type="image/png" href="src/assets/img/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="src/assets/img/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="src/assets/img/favicon/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="src/assets/img/favicon/apple-touch-icon.png" />
+  <meta name="apple-mobile-web-app-title" content="BLM" />
+  <link rel="manifest" href="src/assets/img/favicon/site.webmanifest" />
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -37,6 +44,22 @@
     body { font-family: 'Rajdhani', sans-serif; }
     .font-racing { font-family: 'Orbitron', sans-serif; }
     .hero-video video { object-fit: cover; }
+    @media (max-width: 768px) {
+      .hero-section {
+        height: 100vh;
+        height: 100dvh;
+        min-height: 0 !important;
+        max-height: 100vh;
+        max-height: 100dvh;
+        overflow: hidden;
+      }
+      .hero-section .hero-video {
+        position: absolute;
+        inset: 0;
+        height: 100%;
+        width: 100%;
+      }
+    }
     .signpost-card { transition: transform 0.3s ease; }
     .signpost-card:hover { transform: scale(1.02); }
     .nav-link:hover { color: #fc0000; }
@@ -89,6 +112,31 @@
       transform: translate3d(0, 0, 0) scale(1);
     }
 
+    /* Modal piloto: animação entrada/saída */
+    #pilot-modal {
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    #pilot-modal.pilot-modal-open {
+      opacity: 1;
+    }
+    #pilot-modal.pilot-modal-closing {
+      opacity: 0;
+    }
+    #pilot-modal .pilot-modal-content {
+      transform: scale(0.9);
+      opacity: 0;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+    #pilot-modal.pilot-modal-open .pilot-modal-content {
+      transform: scale(1);
+      opacity: 1;
+    }
+    #pilot-modal.pilot-modal-closing .pilot-modal-content {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+
     /* Button primário (estilo racing) */
     .button {
       --btn-primary: #fc0000;
@@ -99,6 +147,7 @@
       align-items: center;
       justify-content: center;
       gap: 0.75rem;
+      white-space: nowrap;
       padding: 0.75rem 1.5rem;
       min-height: 48px;
       font-family: 'Orbitron', sans-serif;
@@ -130,6 +179,7 @@
       align-items: center;
       justify-content: center;
       gap: 0.75rem;
+      white-space: nowrap;
       padding: 0.75rem 1.5rem;
       min-height: 48px;
       font-family: 'Orbitron', sans-serif;
@@ -145,6 +195,39 @@
     }
     .button-outline:hover { background: rgba(255,255,255,0.15); }
     .button-outline:active { transform: skew(-8deg) scale(0.98); }
+
+    /* Preloader */
+    #preloader {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #000310;
+      background-image:
+        repeating-linear-gradient(
+          -45deg,
+          transparent 0,
+          transparent 70px,
+          rgba(252,0,0,0.03) 70px,
+          rgba(252,0,0,0.03) 72px
+        ),
+        radial-gradient(ellipse 80% 50% at 20% 30%, rgba(252,0,0,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 70%, rgba(230,36,86,0.05) 0%, transparent 50%);
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    #preloader.fade-out {
+      opacity: 0;
+      visibility: hidden;
+    }
+    #preloader .preloader-logo {
+      animation: preloader-fade 1.2s ease-in-out infinite alternate;
+    }
+    @keyframes preloader-fade {
+      0%   { opacity: 0.3; }
+      100% { opacity: 1; }
+    }
 
     /* Racing background shader - aplicado no body */
     body {
@@ -166,6 +249,11 @@
 </head>
 
 <body class="text-white antialiased overflow-x-hidden">
+
+  <!-- Preloader -->
+  <div id="preloader">
+    <img src="src/assets/img/logo-pequena.png" alt="BLM" class="preloader-logo h-16 md:h-20 w-auto">
+  </div>
 
   <!-- Navbar -->
   <nav class="fixed top-0 left-0 right-0 z-50 bg-blm-black/95 backdrop-blur-md border-b border-white/5">
@@ -233,7 +321,7 @@
   </div>
 
   <!-- Hero Section -->
-  <header id="top" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+  <header id="top" class="hero-section relative min-h-screen flex items-center justify-center overflow-hidden">
     <div class="hero-video absolute inset-0 w-full h-full bg-blm-black">
       <!-- Fallback -->
       <div class="absolute inset-0 bg-cover bg-center"
@@ -497,7 +585,7 @@
           </a>
           <a href="#performance"
              class="button-outline">
-            <i data-lucide="zap" class="w-4 h-4 inline"></i> Conhecer BLM Performance
+            <i data-lucide="zap" class="w-4 h-4 inline"></i> BLM Performance
           </a>
         </div>
       </div>
@@ -664,7 +752,7 @@
 
   <!-- Modal detalhes do piloto -->
   <div id="pilot-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/70 backdrop-blur-sm" aria-hidden="true">
-    <div class="relative w-full max-w-2xl max-h-[85vh] overflow-hidden rounded-lg border border-white/10 bg-blm-black shadow-2xl" role="dialog" aria-labelledby="pilot-modal-title">
+    <div class="pilot-modal-content relative w-full max-w-2xl max-h-[85vh] overflow-hidden rounded-lg border border-white/10 bg-blm-black shadow-2xl" role="dialog" aria-labelledby="pilot-modal-title">
       <div class="flex items-center justify-between px-6 py-4 border-b border-white/10">
         <h2 id="pilot-modal-title" class="font-racing text-lg font-bold uppercase text-white"></h2>
         <button id="pilot-modal-close" type="button" class="p-2 rounded hover:bg-white/10 text-white/70 hover:text-white" aria-label="Fechar">
@@ -904,17 +992,24 @@
       }
       modal.classList.remove('hidden');
       modal.classList.add('flex');
+      modal.classList.remove('pilot-modal-closing');
       modal.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
+      requestAnimationFrame(() => modal.classList.add('pilot-modal-open'));
     }
 
     function closePilotModal() {
       const modal = document.getElementById('pilot-modal');
       if (!modal) return;
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-      modal.setAttribute('aria-hidden', 'true');
-      document.body.style.overflow = '';
+      modal.classList.remove('pilot-modal-open');
+      modal.classList.add('pilot-modal-closing');
+      modal.addEventListener('transitionend', function onClose() {
+        modal.removeEventListener('transitionend', onClose);
+        modal.classList.add('hidden');
+        modal.classList.remove('flex', 'pilot-modal-closing');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+      }, { once: true });
     }
 
     document.getElementById('pilot-modal-close')?.addEventListener('click', closePilotModal);
@@ -931,6 +1026,20 @@
 
     // Inicializa ícones Lucide
     lucide.createIcons();
+
+    // Preloader: mínimo 2 segundos, depois fade-out
+    const preloaderStart = Date.now();
+    window.addEventListener('load', () => {
+      const elapsed = Date.now() - preloaderStart;
+      const remaining = Math.max(0, 2000 - elapsed);
+      setTimeout(() => {
+        const preloader = document.getElementById('preloader');
+        if (preloader) {
+          preloader.classList.add('fade-out');
+          preloader.addEventListener('transitionend', () => preloader.remove(), { once: true });
+        }
+      }, remaining);
+    });
   </script>
 </body>
 </html>
