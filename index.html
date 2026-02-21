@@ -266,13 +266,13 @@
 </head>
 
 <body class="text-white antialiased preloader-active">
-<div id="page-wrapper">
 
-  <!-- Preloader -->
+  <!-- Preloader (fora do page-wrapper para funcionar com body.preloader-active > *:not(#preloader)) -->
   <div id="preloader">
     <img src="src/assets/img/logo-pequena.png" alt="BLM" class="preloader-logo h-16 md:h-20 w-auto">
   </div>
 
+<div id="page-wrapper">
   <!-- Navbar -->
   <nav class="fixed top-0 left-0 right-0 z-50 bg-blm-black/95 backdrop-blur-md border-b border-white/5 overflow-x-clip">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full min-w-0 scroll-animate" data-animate="race-down">
