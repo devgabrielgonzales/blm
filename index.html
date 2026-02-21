@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BLM Brasil — Brasil Legends Motorsport</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'blm-dark': '#000310',
+            'blm-black': '#0d0d0e',
+            'blm-red': '#fc0000',   // vermelho BLM (você já tinha aqui)
+            'blm-pink': '#E62456',
+            'blm-gray': '#1a1a1c',
+          },
+          fontFamily: {
+            racing: ['Orbitron', 'sans-serif'],
+            base: ['Rajdhani', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Rajdhani', sans-serif; }
+    .font-racing { font-family: 'Orbitron', sans-serif; }
+    .hero-video video { object-fit: cover; }
+    .signpost-card { transition: transform 0.3s ease; }
+    .signpost-card:hover { transform: scale(1.02); }
+    .nav-link:hover { color: #fc0000; }
+    .gradient-bottom { background: linear-gradient(to top, rgba(0,3,16,1) 0%, rgba(0,3,16,0.6) 40%, rgba(0,3,16,0) 100%); }
+    .hero-overlay { background: linear-gradient(0deg, rgba(0,0,0,0.55), rgba(0,0,0,0.55)); }
+    .hero-gradient-lr { background: linear-gradient(90deg, rgba(252,0,0,0.20) 0%, rgba(0,0,0,0.10) 50%, rgba(230,36,86,0.20) 100%); }
+    .gradient-overlay { background: linear-gradient(180deg, transparent 0%, rgba(0,3,16,0.5) 55%, rgba(0,3,16,0.85) 100%); }
+    /* Menu mobile: sempre fora da tela até clicar (abaixo de 1130px) */
+    .mobile-menu { transform: translateX(100%); }
+    .mobile-menu.open { transform: translateX(0); }
+
+    /* Ícones das pistas: cor primary via mask */
+    .track-icon {
+      width: 2.5rem;
+      height: 2rem;
+      background-color: #fc0000;
+      cursor: pointer;
+      border-radius: 4px;
+      mask-size: contain;
+      mask-repeat: no-repeat;
+      mask-position: center;
+      -webkit-mask-size: contain;
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      opacity: 0.5;
+      transition: opacity 0.2s;
+    }
+    .track-icon:hover { opacity: 1; }
+    .track-icon-current {
+      opacity: 1;
+      width: 15rem;
+      height: 11rem;
+      mask-position: right bottom;
+      -webkit-mask-position: right bottom;
+    }
+
+    /* Scroll entrance - transições suaves (sem keyframes = sem piscadas) */
+    .scroll-animate {
+      opacity: 0;
+      will-change: opacity, transform;
+      transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .scroll-animate[data-animate="race-in"]       { transform: translate3d(50px, 0, 0); }
+    .scroll-animate[data-animate="race-left-in"]   { transform: translate3d(-50px, 0, 0); }
+    .scroll-animate[data-animate="race-up"]        { transform: translate3d(0, 40px, 0); }
+    .scroll-animate[data-animate="race-down"]      { transform: translate3d(0, -24px, 0); }
+    .scroll-animate[data-animate="race-scale"]     { transform: scale(0.94); }
+    .scroll-animate.is-visible {
+      opacity: 1;
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+
+    /* Button primário (estilo racing) */
+    .button {
+      --btn-primary: #fc0000;
+      --btn-dark: #b80000;
+      --btn-glow: rgba(252,0,0,0.4);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      min-height: 48px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #fff;
+      background: var(--btn-primary);
+      border: 2px solid var(--btn-dark);
+      border-radius: 0.75rem;
+      box-shadow: 0 8px 0 var(--btn-dark);
+      transform: skew(-8deg);
+      transition: all 0.15s ease;
+      filter: drop-shadow(0 10px 20px var(--btn-glow));
+    }
+    .button:hover { filter: drop-shadow(0 12px 24px var(--btn-glow)); }
+    .button:active {
+      transform: skew(-8deg) translateY(8px);
+      box-shadow: 0 0 0 var(--btn-dark);
+    }
+    .button > *, .button-outline > * { transform: skew(8deg); }
+
+    /* Button secundário (outline) */
+    .button-outline {
+      --btn-border: rgba(255,255,255,0.2);
+      --btn-bg: rgba(255,255,255,0.08);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1.5rem;
+      min-height: 48px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: #fff;
+      background: var(--btn-bg);
+      border: 2px solid var(--btn-border);
+      border-radius: 0.75rem;
+      transform: skew(-8deg);
+      transition: all 0.15s ease;
+    }
+    .button-outline:hover { background: rgba(255,255,255,0.15); }
+    .button-outline:active { transform: skew(-8deg) scale(0.98); }
+
+    /* Racing background shader - aplicado no body */
+    body {
+      background-color: #000310;
+      background-image:
+        repeating-linear-gradient(
+          -45deg,
+          transparent 0,
+          transparent 70px,
+          rgba(252,0,0,0.03) 70px,
+          rgba(252,0,0,0.03) 72px
+        ),
+        radial-gradient(ellipse 80% 50% at 20% 30%, rgba(252,0,0,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 70%, rgba(230,36,86,0.05) 0%, transparent 50%);
+      background-attachment: fixed;
+      background-size: 100% 100%, 100% 100%, 100% 100%;
+    }
+  </style>
+</head>
+
+<body class="text-white antialiased overflow-x-hidden">
+
+  <!-- Navbar -->
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-blm-black/95 backdrop-blur-md border-b border-white/5">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-animate" data-animate="race-down">
+      <div class="flex items-center justify-between h-20">
+        <!-- Logo -->
+        <a href="#top" class="flex-shrink-0 flex items-center gap-3">
+          <img src="src/assets/img/logo-pequena.png" alt="BLM Brasil" class="h-12 md:h-14 w-auto">
+        </a>
+
+        <!-- Desktop Menu -->
+        <div class="hidden min-[1130px]:flex items-center gap-8">
+          <a href="#ranking" class="nav-link text-sm font-semibold uppercase tracking-wider">Ranking</a>
+          <a href="#community" class="nav-link text-sm font-semibold uppercase tracking-wider">Comunidade</a>
+          <a href="#broadcast" class="nav-link text-sm font-semibold uppercase tracking-wider">Transmissões</a>
+          <a href="#performance" class="nav-link text-sm font-semibold uppercase tracking-wider">BLM Performance</a>
+          <a href="#support" class="nav-link text-sm font-semibold uppercase tracking-wider">Apoiar</a>
+          <a href="#youtube" class="nav-link text-sm font-semibold uppercase tracking-wider">YouTube</a>
+        </div>
+
+        <!-- Right actions -->
+        <div class="flex items-center gap-3">
+          <a href="https://discord.gg/43ZtcMK3um" target="_blank"
+             class="hidden min-[1130px]:inline-flex items-center justify-center gap-2 h-10 px-4 bg-white/10 hover:bg-white/15 rounded font-semibold text-sm transition-colors border border-white/10">
+            <i class="fa-brands fa-discord text-base"></i> Entrar no Discord
+          </a>
+          <a href="https://www.brasillegendsmotorsport.com.br" target="_blank"
+             class="hidden min-[1130px]:inline-flex items-center justify-center gap-2 h-10 px-4 bg-blm-red hover:bg-blm-red/90 rounded font-semibold text-sm transition-colors">
+            <i data-lucide="trophy" class="w-4 h-4 shrink-0"></i> Ranking Oficial
+          </a>
+          <button class="p-2 hover:bg-white/10 rounded-lg transition-colors min-[1130px]:hidden" id="menu-toggle" aria-label="Menu">
+            <i data-lucide="menu" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="mobile-menu fixed top-0 right-0 bottom-0 w-80 bg-blm-black z-50 border-l border-white/10 p-6 transition-transform duration-300 min-[1130px]:hidden">
+    <div class="flex justify-between items-center mb-8">
+      <img src="src/assets/img/logo-pequena.png" alt="BLM Brasil" class="h-10 w-auto">
+      <button id="menu-close" class="p-2 hover:bg-white/10 rounded" aria-label="Fechar menu">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+    <div class="flex flex-col gap-4">
+      <a href="#ranking" class="py-2 border-b border-white/10">Ranking</a>
+      <a href="#community" class="py-2 border-b border-white/10">Comunidade</a>
+      <a href="#broadcast" class="py-2 border-b border-white/10">Transmissões</a>
+      <a href="#performance" class="py-2 border-b border-white/10">BLM Performance</a>
+      <a href="#support" class="py-2 border-b border-white/10">Apoiar</a>
+      <a href="#youtube" class="py-2 border-b border-white/10">YouTube</a>
+
+      <a href="https://discord.gg/43ZtcMK3um" target="_blank"
+         class="inline-flex items-center justify-center gap-2 px-4 py-3 bg-white/10 rounded mt-4 font-semibold border border-white/10">
+        <i class="fa-brands fa-discord"></i> Entrar no Discord
+      </a>
+
+      <a href="https://www.brasillegendsmotorsport.com.br" target="_blank"
+         class="inline-flex items-center justify-center gap-2 px-4 py-3 bg-blm-red rounded font-semibold">
+        <i data-lucide="trophy" class="w-4 h-4 inline"></i> Ranking Oficial
+      </a>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <header id="top" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <div class="hero-video absolute inset-0 w-full h-full bg-blm-black">
+      <!-- Fallback -->
+      <div class="absolute inset-0 bg-cover bg-center"
+           style="background-image:url('https://images.unsplash.com/photo-1517949908119-7205b2bcd1f0?q=80&w=2400&auto=format&fit=crop'); z-index:0;"></div>
+
+      <!-- Seu vídeo -->
+      <video autoplay muted loop playsinline class="absolute inset-0 w-full h-full object-cover" style="z-index:1;">
+        <source src="src/assets/video/trailer.mp4" type="video/mp4">
+      </video>
+    </div>
+
+    <div class="hero-overlay absolute inset-0 w-full h-full pointer-events-none" style="z-index:2;"></div>
+    <div class="hero-gradient-lr absolute inset-0 w-full h-full pointer-events-none" style="z-index:3;"></div>
+    <div class="gradient-overlay absolute inset-0 w-full h-full pointer-events-none"></div>
+    <div class="gradient-bottom absolute bottom-0 left-0 right-0 h-96 pointer-events-none" style="z-index:4;"></div>
+
+    <div class="relative z-10 w-full max-w-7xl px-4 flex flex-col items-center text-center">
+      <div class="scroll-animate mb-6" data-animate="race-left-in" data-delay="150">
+        <img src="src/assets/img/logo-grande.png" alt="Brasil Legends Motorsport"
+             class="h-auto w-auto max-w-[85vw] md:max-w-[520px] lg:max-w-[720px] xl:max-w-[920px] mx-auto opacity-95 object-contain">
+      </div>
+
+      <p class="hidden md:block text-base md:text-lg text-white/85 mb-3 uppercase tracking-[0.35em] scroll-animate" data-animate="race-left-in" data-delay="280">
+        Assetto Corsa Competizione • Servidores Monitorados • Comunidade
+      </p>
+
+      <h1 class="font-racing text-3xl md:text-5xl font-bold tracking-widest mb-6 scroll-animate" data-animate="race-left-in" data-delay="410">
+        A melhor experiência de simulação<br class="hidden md:block"> para quem quer evoluir no ACC
+      </h1>
+
+      <p class="hidden md:block text-lg md:text-xl text-white/80 max-w-3xl mb-10 leading-relaxed scroll-animate" data-animate="race-left-in" data-delay="540">
+        Ambiente sem estresse para treinar, evoluir e competir com respeito. Ranking por pista, temporada atual e
+        acompanhamento real para pilotos que querem constância e performance.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-3 scroll-animate" data-animate="race-left-in" data-delay="670">
+        <a href="https://discord.gg/43ZtcMK3um" target="_blank"
+           class="button">
+          <i class="fa-brands fa-discord text-xl"></i> Entrar no Discord
+        </a>
+        <a href="#ranking"
+           class="button-outline">
+          <i data-lucide="trophy" class="w-5 h-5 inline"></i> Ver Ranking
+        </a>
+      </div>
+
+      <div class="mt-10 flex items-center gap-6 text-sm text-white/60 scroll-animate" data-animate="race-left-in" data-delay="800">
+        <div class="flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4 text-white/70"></i> Moderação ativa</div>
+        <div class="flex items-center gap-2"><i data-lucide="gauge" class="w-4 h-4 text-white/70"></i> Métricas por pista</div>
+        <div class="flex items-center gap-2"><i data-lucide="flag" class="w-4 h-4 text-white/70"></i> Resultados reais</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Quick Title -->
+  <section class="relative py-14 px-4 text-center bg-blm-dark">
+    <div class="absolute inset-x-0 -top-24 h-24 pointer-events-none" style="background: linear-gradient(to bottom, transparent, #000310);"></div>
+    <div class="max-w-4xl mx-auto scroll-animate" data-animate="race-up">
+      <p class="text-xs uppercase tracking-[0.35em] text-white/60 mb-3">Brasil Legends Motorsport</p>
+      <p class="text-2xl md:text-3xl text-blm-red font-semibold uppercase tracking-wider">
+        Ranking oficial • servidores • transmissões • performance
+      </p>
+    </div>
+  </section>
+
+  <!-- Signpost Cards -->
+  <section class="py-16 px-4 bg-blm-dark">
+    <div class="max-w-7xl mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <a href="#ranking" class="signpost-card group block relative overflow-hidden rounded-lg aspect-[4/5] border border-white/10 scroll-animate" data-animate="race-scale" data-delay="0">
+          <img src="src/assets/img/banner 1.png"
+               alt="Ranking" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+          <div class="absolute bottom-0 left-0 right-0 p-6">
+            <h3 class="font-racing text-2xl font-bold uppercase">Ranking</h3>
+            <p class="text-white/75 mt-2">Por pista • temporada atual • categorias por %</p>
+            <i data-lucide="arrow-up-right" class="w-6 h-6 absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+          </div>
+        </a>
+
+        <a href="#community" class="signpost-card group block relative overflow-hidden rounded-lg aspect-[4/5] border border-white/10 scroll-animate" data-animate="race-scale" data-delay="80">
+          <img src="src/assets/img/banner 2.png"
+               alt="Comunidade" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+          <div class="absolute bottom-0 left-0 right-0 p-6">
+            <h3 class="font-racing text-2xl font-bold uppercase">Comunidade</h3>
+            <p class="text-white/75 mt-2">Ambiente monitorado • respeito • evolução</p>
+            <i data-lucide="arrow-up-right" class="w-6 h-6 absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+          </div>
+        </a>
+
+        <a href="#broadcast" class="signpost-card group block relative overflow-hidden rounded-lg aspect-[4/5] border border-white/10 scroll-animate" data-animate="race-scale" data-delay="160">
+          <img src="src/assets/img/banner 3.png"
+               alt="Transmissões" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+          <div class="absolute bottom-0 left-0 right-0 p-6">
+            <h3 class="font-racing text-2xl font-bold uppercase">Transmissões</h3>
+            <p class="text-white/75 mt-2">Narração ACC • campeonatos • highlights</p>
+            <i data-lucide="arrow-up-right" class="w-6 h-6 absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+          </div>
+        </a>
+
+        <a href="#performance" class="signpost-card group block relative overflow-hidden rounded-lg aspect-[4/5] border border-white/10 scroll-animate" data-animate="race-scale" data-delay="240">
+          <img src="src/assets/img/banner 4.png"
+               alt="BLM Performance" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+          <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+          <div class="absolute bottom-0 left-0 right-0 p-6">
+            <h3 class="font-racing text-2xl font-bold uppercase">BLM Performance</h3>
+            <p class="text-white/75 mt-2">Acompanhamento individual • metas • métricas</p>
+            <i data-lucide="arrow-up-right" class="w-6 h-6 absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Ranking Section -->
+  <section id="ranking" class="py-24 px-4 border-t border-white/10">
+    <div class="max-w-7xl mx-auto">
+      <div class="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-6 mb-10 scroll-animate" data-animate="race-up">
+        <div>
+          <h2 class="font-racing text-4xl md:text-5xl font-bold tracking-widest text-blm-red">RANKING OFICIAL</h2>
+          <p class="text-lg text-white/80 mt-3 max-w-2xl">
+            Ranking por pista, considerando apenas a temporada atual e apenas sessões de corrida.
+          </p>
+        </div>
+        <div class="flex flex-col items-end gap-0">
+          <div class="track-icon track-icon-current" style="mask-image: url('src/assets/img/pistas/barcelona-n.svg'); -webkit-mask-image: url('src/assets/img/pistas/barcelona-n.svg');" title="Pista da semana: Barcelona" aria-hidden="true"></div>
+          <p id="pista-da-semana-label" class="text-lg font-semibold text-white/90 -mt-3">Pista da semana: Barcelona</p>
+        </div>
+      </div>
+
+      <!-- Preview (placeholder) -->
+      <div class="grid lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 rounded-lg border border-white/10 bg-white/5 overflow-hidden scroll-animate" data-animate="race-in">
+          <div class="px-6 py-5 border-b border-white/10 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <span class="inline-flex h-2 w-2 rounded-full bg-blm-red"></span>
+              <p class="font-semibold uppercase tracking-wider text-sm text-white/80">Ranking por pista</p>
+            </div>
+            <p id="ranking-updated" class="text-sm text-white/60">Atualizado: —</p>
+          </div>
+          <div class="p-6">
+            <div class="flex flex-col md:flex-row gap-3 mb-6">
+              <select id="ranking-track" class="w-full md:w-64 bg-blm-black/60 border border-white/10 rounded px-4 py-3 text-white/90">
+                <option value="">Selecione a pista</option>
+              </select>
+              <input id="ranking-search" class="flex-1 bg-blm-black/60 border border-white/10 rounded px-4 py-3 text-white/90"
+                     placeholder="Buscar piloto por nome" />
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-left">
+                <thead class="text-xs uppercase tracking-wider text-white/60">
+                  <tr>
+                    <th class="py-3 pr-4 text-right w-12">#</th>
+                    <th class="py-3 pr-4">Piloto</th>
+                    <th class="py-3 pr-4">Categoria</th>
+                    <th class="py-3 pr-4 tabular-nums text-right">Melhor volta</th>
+                    <th class="py-3 pr-4 tabular-nums text-right">Delta</th>
+                    <th class="py-3 pr-4 tabular-nums text-right w-16">Voltas</th>
+                  </tr>
+                </thead>
+                <tbody id="ranking-tbody" class="text-white/85">
+                  <tr>
+                    <td colspan="6" class="py-8 text-center text-white/50">Carregando ranking…</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div id="ranking-ver-buttons" class="hidden mt-5 text-center flex flex-wrap justify-center gap-3">
+              <button id="ranking-ver-mais" type="button" class="px-6 py-3 bg-white/10 hover:bg-blm-red rounded font-semibold border border-white/10 transition-colors">
+                Ver mais
+              </button>
+              <button id="ranking-ver-menos" type="button" class="px-6 py-3 bg-white/10 hover:bg-white/15 rounded font-semibold border border-white/10 transition-colors">
+                Ver menos
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rules -->
+        <div class="rounded-lg border border-white/10 bg-white/5 p-6 scroll-animate" data-animate="race-in">
+          <h3 class="font-racing text-2xl font-bold uppercase">Como funciona</h3>
+
+          <div class="mt-5 space-y-3 text-white/80">
+            <div class="flex gap-3">
+              <i data-lucide="check" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i>
+              <p>Aparece no ranking apenas quem tem <b>20 voltas ou mais</b> na pista.</p>
+            </div>
+            <div class="flex gap-3">
+              <i data-lucide="check" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i>
+              <p>Conta apenas <b>sessão de corrida</b>. Treino e quali não entram.</p>
+            </div>
+            <div class="flex gap-3">
+              <i data-lucide="check" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i>
+              <p>Somente corridas a partir do início da <b>temporada atual</b>.</p>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-6 border-t border-white/10">
+            <h4 class="font-semibold uppercase tracking-wider text-sm text-white/70">Categorias (por %)</h4>
+            <div class="mt-4 grid gap-3">
+              <div class="flex items-center justify-between bg-blm-black/40 border border-white/10 rounded px-4 py-3">
+                <span>🟣 Legend</span><span class="text-white/70">até 1% mais lento</span>
+              </div>
+              <div class="flex items-center justify-between bg-blm-black/40 border border-white/10 rounded px-4 py-3">
+                <span>🔵 Pro</span><span class="text-white/70">até 3%</span>
+              </div>
+              <div class="flex items-center justify-between bg-blm-black/40 border border-white/10 rounded px-4 py-3">
+                <span>🟡 Silver</span><span class="text-white/70">até 6%</span>
+              </div>
+              <div class="flex items-center justify-between bg-blm-black/40 border border-white/10 rounded px-4 py-3">
+                <span>⚪ Amador</span><span class="text-white/70">acima de 6%</span>
+              </div>
+            </div>
+
+            <p class="text-sm text-white/60 mt-5">
+              Como é por pista, você pode ser Legend em uma e Pro/Silver em outra.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Community -->
+  <section id="community" class="py-24 px-4 border-t border-white/10">
+    <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-14 items-center">
+      <div class="scroll-animate" data-animate="race-in">
+        <h2 class="font-racing text-4xl md:text-5xl font-bold tracking-widest text-blm-red">COMUNIDADE BLM</h2>
+        <p class="text-lg text-white/85 leading-relaxed mt-6">
+          Servidores monitorados para garantir um ambiente de treinamento agradável e sem estresse — ideal para quem está começando
+          e também para quem quer voltar a competir com consistência.
+        </p>
+
+        <div class="mt-8 grid sm:grid-cols-2 gap-4">
+          <div class="rounded-lg border border-white/10 bg-white/5 p-5">
+            <p class="font-semibold uppercase tracking-wider text-sm text-white/70">Foco no respeito</p>
+            <p class="text-white/80 mt-2">Regras claras e moderação ativa.</p>
+          </div>
+          <div class="rounded-lg border border-white/10 bg-white/5 p-5">
+            <p class="font-semibold uppercase tracking-wider text-sm text-white/70">Evolução real</p>
+            <p class="text-white/80 mt-2">Treino com métricas, metas e método.</p>
+          </div>
+          <div class="rounded-lg border border-white/10 bg-white/5 p-5">
+            <p class="font-semibold uppercase tracking-wider text-sm text-white/70">Servidores BLM</p>
+            <p class="text-white/80 mt-2">Corridas organizadas e estáveis.</p>
+          </div>
+          <div class="rounded-lg border border-white/10 bg-white/5 p-5">
+            <p class="font-semibold uppercase tracking-wider text-sm text-white/70">Para iniciantes</p>
+            <p class="text-white/80 mt-2">Ambiente seguro pra aprender sem medo.</p>
+          </div>
+        </div>
+
+        <div class="mt-10 flex flex-col sm:flex-row gap-3">
+          <a href="https://discord.gg/43ZtcMK3um" target="_blank"
+             class="button">
+            <i class="fa-brands fa-discord"></i> Entrar no Discord
+          </a>
+          <a href="#performance"
+             class="button-outline">
+            <i data-lucide="zap" class="w-4 h-4 inline"></i> Conhecer BLM Performance
+          </a>
+        </div>
+      </div>
+
+      <div class="relative scroll-animate" data-animate="race-in">
+        <img class="w-full rounded-lg border border-white/10"
+             src="src/assets/img/banner comunidade.jpg"
+             alt="Comunidade BLM" />
+        <div class="absolute -bottom-6 -left-6 bg-blm-black/80 border border-white/10 rounded-lg p-5 max-w-xs hidden md:block">
+          <p class="text-sm uppercase tracking-wider text-white/60">Objetivo BLM</p>
+          <p class="mt-2 text-white/85">Incluir novos jogadores e atrair pilotos experientes de volta para uma experiência única.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Broadcast / YouTube -->
+  <section id="broadcast" class="py-24 px-4 border-t border-white/10">
+    <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-14 items-center">
+      <div class="scroll-animate" data-animate="race-in">
+        <h2 class="font-racing text-4xl md:text-5xl font-bold tracking-widest text-blm-red">TRANSMISSÕES</h2>
+        <p class="text-lg text-white/85 leading-relaxed mt-6">
+          Narração de corridas no Assetto Corsa Competizione, campeonatos e conteúdo pra comunidade evoluir.
+        </p>
+        <div class="mt-10 flex gap-3 flex-col sm:flex-row">
+          <a href="https://www.youtube.com/@brasillegendsmotorsport" target="_blank"
+             class="button">
+            <i class="fa-brands fa-youtube"></i> Abrir canal no YouTube
+          </a>
+        </div>
+      </div>
+
+      <div id="youtube" class="rounded-lg border border-white/10 bg-white/5 overflow-hidden scroll-animate" data-animate="race-in">
+        <div class="px-6 py-5 border-b border-white/10 flex items-center justify-between">
+          <p class="font-semibold uppercase tracking-wider text-sm text-white/80">Canal — Brasil Legends Motorsport</p>
+          <a href="https://www.youtube.com/watch?v=LL2NUmtoEzA" target="_blank" class="text-sm text-white/70 hover:text-white">
+            Abrir <i data-lucide="external-link" class="w-3 h-3 inline"></i>
+          </a>
+        </div>
+        <div class="aspect-video w-full bg-black">
+          <iframe class="w-full h-full"
+            src="https://www.youtube.com/embed/LL2NUmtoEzA?start=31"
+            title="Highlights | Brasil Challenge Amador | 7º Etapa - Mount Panorama | 18-10-25"
+            frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Performance -->
+  <section id="performance" class="py-24 px-4 border-t border-white/10">
+    <div class="max-w-7xl mx-auto">
+      <div class="mb-10 scroll-animate" data-animate="race-up">
+        <h2 class="font-racing text-4xl md:text-5xl font-bold tracking-widest text-blm-red">BLM PERFORMANCE</h2>
+        <p class="text-lg text-white/80 mt-3 max-w-3xl">
+          Acompanhamento individual e privado para pilotos amadores do ACC. Não é curso, não é PDF, não é vídeo gravado —
+          é acompanhamento real, feito sob medida.
+        </p>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6">
+        <div class="rounded-lg border border-white/10 bg-white/5 p-6 scroll-animate" data-animate="race-up" data-delay="0">
+          <h3 class="font-racing text-xl font-bold uppercase">O que trabalhamos</h3>
+          <ul class="mt-4 space-y-3 text-white/80">
+            <li class="flex gap-3"><i data-lucide="wrench" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Configuração física (PC, cockpit, volante e pedais)</li>
+            <li class="flex gap-3"><i data-lucide="sliders-horizontal" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Ajustes do ACC e do PC para melhor performance</li>
+            <li class="flex gap-3"><i data-lucide="chart-line" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Análise individual da pilotagem</li>
+            <li class="flex gap-3"><i data-lucide="target" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Plano de evolução com metas claras</li>
+            <li class="flex gap-3"><i data-lucide="timer" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Acompanhamento semanal com métricas dos servidores BLM</li>
+          </ul>
+        </div>
+
+        <div class="rounded-lg border border-white/10 bg-white/5 p-6 scroll-animate" data-animate="race-up" data-delay="100">
+          <h3 class="font-racing text-xl font-bold uppercase">Como funciona</h3>
+          <ul class="mt-4 space-y-3 text-white/80">
+            <li class="flex gap-3"><i data-lucide="clock" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> 8 horas semanais (horário flexível)</li>
+            <li class="flex gap-3"><i data-lucide="lock" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Aulas particulares e privadas</li>
+            <li class="flex gap-3"><i data-lucide="ban" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Horas não acumulativas</li>
+            <li class="flex gap-3"><i data-lucide="hourglass" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Tolerância de 15 min de atraso</li>
+            <li class="flex gap-3"><i data-lucide="calendar-x" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Cancelamento com 12h de antecedência</li>
+          </ul>
+
+          <div class="mt-6 pt-6 border-t border-white/10">
+            <p class="text-sm text-white/60">
+              Investimento: você pode colocar aqui depois (ou deixar para fechar no Discord).
+            </p>
+          </div>
+        </div>
+
+        <div class="rounded-lg border border-white/10 bg-white/5 p-6 scroll-animate" data-animate="race-up" data-delay="200">
+          <h3 class="font-racing text-xl font-bold uppercase">Suporte exclusivo</h3>
+          <ul class="mt-4 space-y-3 text-white/80">
+            <li class="flex gap-3"><i data-lucide="message-circle" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Sala reservada no Discord (horário comercial)</li>
+            <li class="flex gap-3"><i data-lucide="badge" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Cargo Performance</li>
+            <li class="flex gap-3"><i data-lucide="zap" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Atendimento prioritário pela administração BLM</li>
+          </ul>
+
+          <a href="https://discord.gg/43ZtcMK3um" target="_blank"
+             class="button mt-8 w-full justify-center">
+            <i class="fa-brands fa-discord"></i> Entrar para solicitar
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Support / Donations -->
+  <section id="support" class="py-24 px-4 border-t border-white/10">
+    <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-14 items-start">
+      <div class="scroll-animate" data-animate="race-in">
+        <h2 class="font-racing text-4xl md:text-5xl font-bold tracking-widest text-blm-red">APOIE A BLM</h2>
+        <p class="text-lg text-white/85 leading-relaxed mt-6">
+          A BLM tem custo com server dedicado, administração das competições, transmissão das corridas e cuidados
+          para que tudo funcione com o mínimo de paz para as atividades.
+        </p>
+
+        <div class="mt-8 rounded-lg border border-white/10 bg-white/5 p-6">
+          <p class="text-sm uppercase tracking-wider text-white/60">PIX</p>
+          <p class="mt-2 text-white/90"><b>Chave:</b> familytechrio@gmail.com</p>
+          <p class="text-white/70"><b>Nome:</b> Luciano da Silva Neves</p>
+
+          <div class="mt-5 pt-5 border-t border-white/10">
+            <p class="text-sm uppercase tracking-wider text-white/60">PayPal</p>
+            <p class="mt-2 text-white/90"><b>E-mail:</b> familytechrio@gmail.com</p>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="rounded-lg border border-white/10 bg-white/5 p-6 scroll-animate flex flex-col items-center text-center" data-animate="race-in">
+        <h3 class="font-racing text-2xl font-bold uppercase">QRCode PIX</h3>
+        <div class="mt-5 rounded-lg border border-white/10 bg-white p-3 aspect-square max-w-[160px] flex items-center justify-center overflow-hidden mx-auto">
+          <img src="src/assets/img/pix.png" alt="QR Code PIX" class="w-full h-full object-contain">
+        </div>
+
+        <div class="mt-6 pt-6 border-t border-white/10 w-full text-left">
+          <h4 class="font-semibold uppercase tracking-wider text-sm text-white/70">Transparência</h4>
+          <p class="text-white/75 mt-2">
+            O apoio ajuda a manter e melhorar tudo que existe hoje na BLM: servidores, organização, transmissão e evolução da comunidade.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-blm-red border-t border-white/20 py-4 px-4">
+    <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
+      <p class="text-white/90 text-sm">
+        © <span id="year"></span> BLM Brasil — Brasil Legends Motorsport. Todos os direitos reservados.
+      </p>
+      <div class="flex gap-4">
+        <a href="https://www.youtube.com/@brasillegendsmotorsport" target="_blank" class="text-white/90 hover:text-white transition-colors" aria-label="YouTube">
+          <i class="fab fa-youtube text-xl"></i>
+        </a>
+        <a href="https://discord.gg/43ZtcMK3um" target="_blank" class="text-white/90 hover:text-white transition-colors" aria-label="Discord">
+          <i class="fab fa-discord text-xl"></i>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal detalhes do piloto -->
+  <div id="pilot-modal" class="fixed inset-0 z-[100] hidden items-center justify-center p-4 bg-black/70 backdrop-blur-sm" aria-hidden="true">
+    <div class="relative w-full max-w-2xl max-h-[85vh] overflow-hidden rounded-lg border border-white/10 bg-blm-black shadow-2xl" role="dialog" aria-labelledby="pilot-modal-title">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-white/10">
+        <h2 id="pilot-modal-title" class="font-racing text-lg font-bold uppercase text-white"></h2>
+        <button id="pilot-modal-close" type="button" class="p-2 rounded hover:bg-white/10 text-white/70 hover:text-white" aria-label="Fechar">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+      <div class="overflow-y-auto max-h-[calc(85vh-80px)] p-6">
+        <table class="min-w-full text-left">
+          <thead class="text-xs uppercase tracking-wider text-white/60 sticky top-0 bg-blm-black">
+            <tr>
+              <th class="py-3 pr-4">Pista</th>
+              <th class="py-3 pr-4">#</th>
+              <th class="py-3 pr-4">Categoria</th>
+              <th class="py-3 pr-4">Melhor volta</th>
+              <th class="py-3 pr-4">Delta</th>
+              <th class="py-3 pr-4">Voltas</th>
+            </tr>
+          </thead>
+          <tbody id="pilot-modal-tbody" class="text-white/85">
+          </tbody>
+        </table>
+        <p id="pilot-modal-empty" class="hidden py-6 text-center text-white/50">Nenhuma pista com resultados.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Scroll entrance transitions
+    (function() {
+      const opts = { rootMargin: '0px 0px -40px 0px', threshold: 0.15 };
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target;
+          const delay = parseInt(el.dataset.delay, 10) || 0;
+          if (delay > 0) {
+            el.style.transitionDelay = delay + 'ms';
+          }
+          requestAnimationFrame(() => el.classList.add('is-visible'));
+          obs.unobserve(el);
+        });
+      }, opts);
+      document.querySelectorAll('.scroll-animate[data-animate]').forEach(el => obs.observe(el));
+    })();
+
+    // Mobile menu toggle
+    const menuToggle = document.getElementById('menu-toggle');
+    const menuClose = document.getElementById('menu-close');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    menuToggle?.addEventListener('click', () => mobileMenu.classList.add('open'));
+    menuClose?.addEventListener('click', () => mobileMenu.classList.remove('open'));
+    mobileMenu?.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => mobileMenu.classList.remove('open'));
+    });
+
+    // Footer year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Ranking: local simulado (src/data/ranking.json) — sem CORS em dev
+    const RANKING_URL = 'src/data/ranking.json';
+    const trackNames = {
+      barcelona: 'Barcelona',
+      brands_hatch: 'Brands Hatch',
+      cota: 'Circuit of the Americas',
+      donington: 'Donington',
+      hungaroring: 'Hungaroring',
+      imola: 'Imola',
+      kyalami: 'Kyalami',
+      misano: 'Misano',
+      monza: 'Monza',
+      mount_panorama: 'Mount Panorama',
+      nurburgring_24h: 'Nürburgring 24h',
+      nurburgring: 'Nürburgring GP',
+      oulton_park: 'Oulton Park',
+      paul_ricard: 'Paul Ricard',
+      red_bull_ring: 'Red Bull Ring',
+      silverstone: 'Silverstone',
+      spa: 'Spa-Francorchamps',
+      snetterton: 'Snetterton',
+      suzuka: 'Suzuka',
+      valencia: 'Valencia',
+      zandvoort: 'Zandvoort',
+      zolder: 'Zolder'
+    };
+
+    let rankingData = null;
+
+    function formatTrack(key) {
+      return trackNames[key] || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    const RANKING_LIMIT_INITIAL = 10;
+    let rankingExpanded = false;
+
+    function renderRanking(drivers, search = '', limit = null) {
+      const tbody = document.getElementById('ranking-tbody');
+      const verButtonsWrap = document.getElementById('ranking-ver-buttons');
+      const verMaisBtn = document.getElementById('ranking-ver-mais');
+      const verMenosBtn = document.getElementById('ranking-ver-menos');
+      if (!tbody) return;
+
+      const q = (search || '').trim().toLowerCase();
+      const filtered = q
+        ? drivers.filter(d => d.nome && d.nome.toLowerCase().includes(q))
+        : drivers;
+      const toShow = limit != null ? filtered.slice(0, limit) : filtered;
+      const hasMore = filtered.length > toShow.length;
+      const showVerMais = hasMore && !rankingExpanded;
+      const showVerMenos = rankingExpanded && filtered.length > RANKING_LIMIT_INITIAL;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-white/50">Nenhum resultado</td></tr>';
+        if (verButtonsWrap) verButtonsWrap.classList.add('hidden');
+        return;
+      }
+
+      tbody.innerHTML = toShow.map(d => {
+        const guid = d.guid || '';
+        const nome = (d.nome || '—').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const nomeCell = guid
+          ? `<button type="button" class="text-left font-semibold text-white hover:text-blm-red cursor-pointer" data-pilot-guid="${guid}" data-pilot-nome="${nome.replace(/"/g, '&quot;')}">${nome}</button>`
+          : `<span class="font-semibold">${nome}</span>`;
+        return `
+        <tr class="border-t border-white/10">
+          <td class="py-4 pr-4 text-right tabular-nums">${d.posicao}</td>
+          <td class="py-4 pr-4">${nomeCell}</td>
+          <td class="py-4 pr-4"><span class="px-2 py-1 rounded bg-white/10 border border-white/10 text-xs">${d.categoria || '—'}</span></td>
+          <td class="py-4 pr-4 text-right tabular-nums font-mono text-sm">${d.melhor_volta || '—'}</td>
+          <td class="py-4 pr-4 text-right tabular-nums font-mono text-sm text-white/70">${d.delta || '—'}</td>
+          <td class="py-4 pr-4 text-right tabular-nums text-white/70">${d.voltas ?? '—'}</td>
+        </tr>
+      `}).join('');
+
+      if (verButtonsWrap) verButtonsWrap.classList.toggle('hidden', !showVerMais && !showVerMenos);
+      if (verMaisBtn) verMaisBtn.classList.toggle('hidden', !showVerMais);
+      if (verMenosBtn) verMenosBtn.classList.toggle('hidden', !showVerMenos);
+    }
+
+    const PISTA_DA_SEMANA = 'barcelona';
+
+    function updateTrackSelectionUI(trackKey) {
+      const label = document.getElementById('pista-da-semana-label');
+      if (label) label.textContent = 'Pista da semana: ' + formatTrack(trackKey);
+    }
+
+    function onTrackChange(expanded = false) {
+      const select = document.getElementById('ranking-track');
+      const search = document.getElementById('ranking-search');
+      const trackKey = select?.value || PISTA_DA_SEMANA;
+      updateTrackSelectionUI(trackKey);
+      if (!trackKey || !rankingData?.pistas?.[trackKey]) {
+        document.getElementById('ranking-tbody').innerHTML = '<tr><td colspan="6" class="py-8 text-center text-white/50">Selecione uma pista para ver o ranking</td></tr>';
+        document.getElementById('ranking-ver-buttons')?.classList.add('hidden');
+        return;
+      }
+      const limit = expanded ? null : RANKING_LIMIT_INITIAL;
+      renderRanking(rankingData.pistas[trackKey], search?.value ?? '', limit);
+    }
+
+    fetch(RANKING_URL)
+      .then(r => r.json())
+      .then(data => {
+        rankingData = data;
+        const el = document.getElementById('ranking-updated');
+        if (el && data?.atualizado_em) el.textContent = 'Atualizado: ' + data.atualizado_em;
+
+        const select = document.getElementById('ranking-track');
+        if (select && data?.pistas) {
+          Object.keys(data.pistas).sort().forEach(key => {
+            const opt = document.createElement('option');
+            opt.value = key;
+            opt.textContent = formatTrack(key);
+            select.appendChild(opt);
+          });
+          select.value = PISTA_DA_SEMANA;
+        }
+        if (data?.pistas?.[PISTA_DA_SEMANA]) onTrackChange(false);
+      })
+      .catch(() => {
+        document.getElementById('ranking-updated').textContent = 'Erro ao carregar ranking';
+      });
+
+    document.getElementById('ranking-track')?.addEventListener('change', () => onTrackChange(rankingExpanded));
+    document.getElementById('ranking-search')?.addEventListener('input', () => onTrackChange(rankingExpanded));
+    document.getElementById('ranking-ver-mais')?.addEventListener('click', () => {
+      rankingExpanded = true;
+      onTrackChange(true);
+    });
+    document.getElementById('ranking-ver-menos')?.addEventListener('click', () => {
+      rankingExpanded = false;
+      onTrackChange(false);
+    });
+
+    // Modal piloto: todas as pistas e tempos
+    function getPilotEntriesByGuid(guid) {
+      if (!rankingData?.pistas || !guid) return { nome: '', entries: [] };
+      const entries = [];
+      let nome = '';
+      for (const [trackKey, drivers] of Object.entries(rankingData.pistas)) {
+        const d = drivers.find(p => p.guid === guid);
+        if (d) {
+          entries.push({ trackKey, ...d });
+          if (!nome && d.nome) nome = d.nome;
+        }
+      }
+      entries.sort((a, b) => formatTrack(a.trackKey).localeCompare(formatTrack(b.trackKey)));
+      return { nome, entries };
+    }
+
+    function showPilotModal(guid, nome) {
+      const modal = document.getElementById('pilot-modal');
+      const title = document.getElementById('pilot-modal-title');
+      const tbody = document.getElementById('pilot-modal-tbody');
+      const empty = document.getElementById('pilot-modal-empty');
+      if (!modal || !title || !tbody) return;
+
+      const { nome: resolvedNome, entries } = getPilotEntriesByGuid(guid);
+      const displayNome = nome || resolvedNome || 'Piloto';
+
+      title.textContent = displayNome;
+      if (entries.length === 0) {
+        tbody.innerHTML = '';
+        empty.classList.remove('hidden');
+      } else {
+        empty.classList.add('hidden');
+        tbody.innerHTML = entries.map(e => `
+          <tr class="border-t border-white/10">
+            <td class="py-3 pr-4 font-medium">${formatTrack(e.trackKey)}</td>
+            <td class="py-3 pr-4 text-right tabular-nums">${e.posicao}</td>
+            <td class="py-3 pr-4"><span class="px-2 py-0.5 rounded bg-white/10 border border-white/10 text-xs">${e.categoria || '—'}</span></td>
+            <td class="py-3 pr-4 text-right tabular-nums font-mono text-sm">${e.melhor_volta || '—'}</td>
+            <td class="py-3 pr-4 text-right tabular-nums font-mono text-sm text-white/70">${e.delta || '—'}</td>
+            <td class="py-3 pr-4 text-right tabular-nums text-white/70">${e.voltas ?? '—'}</td>
+          </tr>
+        `).join('');
+      }
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      modal.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closePilotModal() {
+      const modal = document.getElementById('pilot-modal');
+      if (!modal) return;
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      modal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('pilot-modal-close')?.addEventListener('click', closePilotModal);
+    document.getElementById('pilot-modal')?.addEventListener('click', e => {
+      if (e.target === e.currentTarget) closePilotModal();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closePilotModal();
+    });
+    document.getElementById('ranking-tbody')?.addEventListener('click', e => {
+      const btn = e.target.closest('[data-pilot-guid]');
+      if (btn) showPilotModal(btn.dataset.pilotGuid, btn.dataset.pilotNome);
+    });
+
+    // Inicializa ícones Lucide
+    lucide.createIcons();
+  </script>
+</body>
+</html>
