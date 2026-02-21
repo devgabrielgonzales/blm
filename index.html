@@ -228,6 +228,7 @@
       0%   { opacity: 0.3; }
       100% { opacity: 1; }
     }
+    body.preloader-active > *:not(#preloader) { visibility: hidden; }
 
     /* Racing background shader - aplicado no body */
     body {
@@ -248,7 +249,7 @@
   </style>
 </head>
 
-<body class="text-white antialiased overflow-x-hidden">
+<body class="text-white antialiased overflow-x-hidden preloader-active">
 
   <!-- Preloader -->
   <div id="preloader">
@@ -780,8 +781,8 @@
   </div>
 
   <script>
-    // Scroll entrance transitions
-    (function() {
+    // Scroll entrance transitions (iniciadas após o preloader)
+    function initScrollAnimations() {
       const opts = { rootMargin: '0px 0px -40px 0px', threshold: 0.15 };
       const obs = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -796,7 +797,7 @@
         });
       }, opts);
       document.querySelectorAll('.scroll-animate[data-animate]').forEach(el => obs.observe(el));
-    })();
+    }
 
     // Mobile menu toggle
     const menuToggle = document.getElementById('menu-toggle');
@@ -1027,7 +1028,7 @@
     // Inicializa ícones Lucide
     lucide.createIcons();
 
-    // Preloader: mínimo 2 segundos, depois fade-out
+    // Preloader: mínimo 2 segundos, depois fade-out e inicia animações
     const preloaderStart = Date.now();
     window.addEventListener('load', () => {
       const elapsed = Date.now() - preloaderStart;
@@ -1036,7 +1037,14 @@
         const preloader = document.getElementById('preloader');
         if (preloader) {
           preloader.classList.add('fade-out');
-          preloader.addEventListener('transitionend', () => preloader.remove(), { once: true });
+          preloader.addEventListener('transitionend', () => {
+            preloader.remove();
+            document.body.classList.remove('preloader-active');
+            initScrollAnimations();
+          }, { once: true });
+        } else {
+          document.body.classList.remove('preloader-active');
+          initScrollAnimations();
         }
       }, remaining);
     });
