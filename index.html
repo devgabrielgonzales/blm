@@ -40,8 +40,8 @@
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 
   <style>
-    html { scroll-behavior: smooth; }
-    body { font-family: 'Rajdhani', sans-serif; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+    body { font-family: 'Rajdhani', sans-serif; overflow-x: hidden; }
     .font-racing { font-family: 'Orbitron', sans-serif; }
     .hero-video video { object-fit: cover; }
     @media (max-width: 768px) {
@@ -258,12 +258,12 @@
   </div>
 
   <!-- Navbar -->
-  <nav class="fixed top-0 left-0 right-0 z-50 bg-blm-black/95 backdrop-blur-md border-b border-white/5">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-animate" data-animate="race-down">
-      <div class="flex items-center justify-between h-20">
+  <nav class="fixed top-0 left-0 right-0 z-50 bg-blm-black/95 backdrop-blur-md border-b border-white/5 w-full min-w-0 overflow-x-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full min-w-0 scroll-animate" data-animate="race-down">
+      <div class="flex items-center justify-between h-20 min-w-0 gap-2">
         <!-- Logo -->
-        <a href="#top" class="flex-shrink-0 flex items-center gap-3">
-          <img src="src/assets/img/logo-pequena.png" alt="BLM Brasil" class="h-12 md:h-14 w-auto">
+        <a href="#top" class="flex-shrink-0 min-w-0 flex items-center gap-3">
+          <img src="src/assets/img/logo-pequena.png" alt="BLM Brasil" class="h-12 md:h-14 w-auto max-h-14 object-contain">
         </a>
 
         <!-- Desktop Menu -->
@@ -277,7 +277,7 @@
         </div>
 
         <!-- Right actions -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 flex-shrink-0">
           <a href="https://discord.gg/43ZtcMK3um" target="_blank"
              class="hidden min-[1130px]:inline-flex items-center justify-center gap-2 h-10 px-4 bg-white/10 hover:bg-white/15 rounded font-semibold text-sm transition-colors border border-white/10">
             <i class="fa-brands fa-discord text-base"></i> Entrar no Discord
