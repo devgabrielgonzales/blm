@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sorteador — Pista da Semana | BLM</title>
+  <script src="src/js/config.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="icon" type="image/png" href="src/assets/img/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="shortcut icon" href="src/assets/img/favicon/favicon.ico" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'blm-dark': '#000310',
+            'blm-black': '#0d0d0e',
+            'blm-red': '#fc0000',
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: #000310;
+      background-image:
+        repeating-linear-gradient(-45deg, transparent 0, transparent 70px, rgba(252,0,0,0.03) 70px, rgba(252,0,0,0.03) 72px),
+        radial-gradient(ellipse 80% 50% at 20% 30%, rgba(252,0,0,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 70%, rgba(230,36,86,0.05) 0%, transparent 50%);
+      background-attachment: fixed;
+    }
+    .track-card {
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .track-card:hover { transform: scale(1.03); }
+    .track-card.selected { box-shadow: 0 0 0 3px #fc0000; }
+    .track-card .check { opacity: 0; transition: opacity 0.2s; }
+    .track-card.selected .check { opacity: 1; }
+    .result-flash { animation: result-flash 0.5s ease-out; }
+    @keyframes result-flash {
+      0% { transform: scale(0.9); opacity: 0; }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .sort-modal { opacity: 0; visibility: hidden; transition: opacity 0.3s, visibility 0.3s; }
+    .sort-modal.open { opacity: 1; visibility: visible; }
+    .sort-strip { will-change: transform; }
+    .sort-phase-winner { display: none !important; visibility: hidden; pointer-events: none; }
+    .sort-phase-winner.visible { display: flex !important; visibility: visible; pointer-events: auto; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; animation: winner-reveal 0.6s ease-out; }
+    @keyframes winner-reveal {
+      0% { opacity: 0; transform: scale(0.95); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="text-white min-h-screen antialiased">
+  <!-- Login -->
+  <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-8 w-full max-w-md">
+      <div class="text-center mb-6">
+        <img src="src/assets/img/logo-pequena.png" alt="BLM" class="h-14 w-auto mx-auto mb-4">
+        <h1 class="text-xl font-bold">Sorteador — Pista da Semana</h1>
+        <p class="text-white/60 text-sm mt-1">Faça login para sortear</p>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-white/70 mb-1">Email</label>
+          <input type="email" id="login-email" class="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-3 text-white" placeholder="seu@email.com" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-white/70 mb-1">Senha</label>
+          <input type="password" id="login-password" class="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-3 text-white" placeholder="••••••••" />
+        </div>
+        <p id="login-status" class="text-sm text-red-400 min-h-[1.25rem]"></p>
+        <button type="button" id="btn-login" class="w-full px-5 py-3 bg-blm-red hover:bg-blm-red/90 rounded-lg font-semibold transition">
+          Entrar
+        </button>
+      </div>
+      <p id="login-error-config" class="mt-4 text-sm text-amber-400 text-center hidden"></p>
+    </div>
+  </div>
+
+  <!-- Modal do sorteio (tela cheia) -->
+  <div id="sort-modal" class="sort-modal fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-md min-h-screen w-full p-6">
+    <!-- Fase 1: barra com mapas passando -->
+    <div id="sort-phase-strip" class="flex flex-col items-center w-full max-w-6xl flex-1 justify-center">
+      <p class="text-center text-white/70 mb-6 text-lg">Sorteando…</p>
+      <div class="w-full overflow-hidden rounded-2xl border-2 border-blm-red/50 bg-black/80 shadow-lg shadow-blm-red/20" style="min-height: 200px; height: 28vh;">
+        <div id="sort-viewport" class="relative w-full h-full overflow-hidden" style="min-height: 200px; height: 28vh;">
+          <div id="sort-strip" class="sort-strip absolute flex items-center" style="left: 0; top: 0; bottom: 0; align-items: center;">
+            <!-- preenchido por JS -->
+          </div>
+          <!-- Marcador do centro: mesmo tamanho do card (140px × 130px = img 4/3 + label) -->
+          <div id="sort-center-marker" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140px] h-[130px] pointer-events-none flex items-center justify-center" aria-hidden="true">
+            <div class="w-full h-full rounded-lg border-2 border-dashed border-blm-red/70 bg-blm-red/5"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Fase 2: destaque da pista sorteada (oculta durante o sorteio) -->
+    <div id="sort-phase-winner" class="sort-phase-winner absolute inset-0 z-10">
+      <p class="text-blm-red font-bold text-sm uppercase tracking-widest mb-4">Pista da semana</p>
+      <div id="sort-winner-icon" class="w-64 h-48 sm:w-80 sm:h-60 md:w-96 md:h-72 bg-blm-red rounded-2xl mb-6 shadow-2xl shadow-blm-red/30" style="mask-size:contain;mask-repeat:no-repeat;mask-position:center;-webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;"></div>
+      <p id="sort-winner-name" class="text-white font-bold text-3xl sm:text-4xl md:text-5xl text-center mb-8"></p>
+      <button id="btn-fechar-sorteio" type="button" class="px-8 py-3 bg-blm-red hover:bg-blm-red/90 rounded-xl font-semibold transition flex items-center gap-2">
+        <i class="fa-solid fa-times"></i> Fechar
+      </button>
+    </div>
+  </div>
+
+  <!-- App -->
+  <div id="app" class="min-h-screen hidden">
+    <main class="max-w-6xl mx-auto px-4 py-8">
+      <div class="mb-8 text-center">
+        <p class="text-white/70 mb-2">Clique nas pistas para incluí-las no sorteio. Depois clique em Sortear.</p>
+        <p id="selected-count" class="text-blm-red font-semibold">0 pistas selecionadas</p>
+      </div>
+
+      <div id="track-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 mb-10">
+        <!-- preenchido por JS -->
+      </div>
+
+      <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+        <button id="btn-sortear" disabled
+          class="px-8 py-4 bg-blm-red hover:bg-blm-red/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-bold text-lg transition flex items-center gap-3">
+          <i class="fa-solid fa-shuffle"></i> Sortear
+        </button>
+        <button id="btn-salvar" disabled
+          class="px-8 py-4 bg-white/10 hover:bg-white/15 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-semibold transition flex items-center gap-3">
+          <i class="fa-solid fa-floppy-disk"></i> Salvar no site
+        </button>
+      </div>
+
+      <div id="result-area" class="mt-12 text-center hidden">
+        <p class="text-white/60 mb-2">Pista sorteada:</p>
+        <div id="result-card" class="inline-block p-6 rounded-2xl bg-white/5 border border-blm-red/50">
+          <div id="result-icon" class="w-32 h-24 mx-auto mb-3 bg-blm-red rounded-lg"></div>
+          <p id="result-name" class="font-bold text-xl text-blm-red"></p>
+        </div>
+      </div>
+
+      <p id="save-status" class="mt-6 text-center text-sm"></p>
+      <div class="mt-12 flex justify-center gap-4">
+        <a href="index.html" target="_blank" class="text-white/50 hover:text-white/80 text-sm">Ver site</a>
+        <a href="admin.html" class="text-white/50 hover:text-white/80 text-sm">Painel</a>
+        <button id="btn-logout" type="button" class="text-white/50 hover:text-white/80 text-sm">Sair</button>
+      </div>
+    </main>
+  </div>
+
+  <script type="module">
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    const getClient = () => window.SUPABASE_ANON_KEY ? createClient('https://bsnnvsdzwqdthrrubbko.supabase.co', window.SUPABASE_ANON_KEY) : null;
+
+    const TRACKS = [
+      { key: 'barcelona', name: 'Barcelona', img: 'barcelona-n.svg' },
+      { key: 'brands_hatch', name: 'Brands Hatch', img: 'brands-hatch-n.svg' },
+      { key: 'cota', name: 'Circuit of the Americas', img: 'cota.svg' },
+      { key: 'donington', name: 'Donington', img: 'donington.svg' },
+      { key: 'hungaroring', name: 'Hungaroring', img: 'hungaroring-n.svg' },
+      { key: 'imola', name: 'Imola', img: 'imola.svg' },
+      { key: 'kyalami', name: 'Kyalami', img: 'kyalami.svg' },
+      { key: 'misano', name: 'Misano', img: 'misano-n.svg' },
+      { key: 'monza', name: 'Monza', img: 'monza-n.svg' },
+      { key: 'mount_panorama', name: 'Mount Panorama', img: 'bathurst.svg' },
+      { key: 'nurburgring_24h', name: 'Nürburgring 24h', img: 'NBR24h-ok.svg' },
+      { key: 'nurburgring', name: 'Nürburgring GP', img: 'nurburgring-n.svg' },
+      { key: 'oulton_park', name: 'Oulton Park', img: 'oulton.svg' },
+      { key: 'paul_ricard', name: 'Paul Ricard', img: 'paul-ricard-n.svg' },
+      { key: 'red_bull_ring', name: 'Red Bull Ring', img: 'austria-n.svg' },
+      { key: 'silverstone', name: 'Silverstone', img: 'silverstone-n.svg' },
+      { key: 'spa', name: 'Spa-Francorchamps', img: 'spa-n.svg' },
+      { key: 'snetterton', name: 'Snetterton', img: 'snetterton.svg' },
+      { key: 'suzuka', name: 'Suzuka', img: 'suzuka.svg' },
+      { key: 'valencia', name: 'Valencia', img: 'valencia.svg' },
+      { key: 'zandvoort', name: 'Zandvoort', img: 'zandvoort.svg' },
+      { key: 'zolder', name: 'Zolder', img: 'zolder-n.svg' },
+    ];
+
+    let selectedTracks = new Set();
+    let lastSorted = null;
+
+    function renderGrid() {
+      const grid = document.getElementById('track-grid');
+      if (!grid) return;
+      grid.innerHTML = TRACKS.map(t => {
+        const sel = selectedTracks.has(t.key);
+        const imgPath = `src/assets/img/pistas/${t.img}`;
+        return `
+          <div class="track-card rounded-xl border-2 overflow-hidden ${sel ? 'selected border-blm-red bg-blm-red/10' : 'border-white/10 bg-white/5'}"
+               data-key="${t.key}" data-name="${t.name}" data-img="${imgPath}">
+            <div class="relative aspect-[4/3] flex items-center justify-center p-2">
+              <div class="w-full h-full bg-blm-red/80 rounded-lg flex items-center justify-center" style="mask-image:url('${imgPath}');-webkit-mask-image:url('${imgPath}');mask-size:contain;mask-repeat:no-repeat;mask-position:center;">
+              </div>
+              <div class="check absolute top-2 right-2 w-8 h-8 rounded-full bg-blm-red flex items-center justify-center">
+                <i class="fa-solid fa-check text-white text-sm"></i>
+              </div>
+            </div>
+            <p class="text-center py-2 text-sm font-medium truncate px-1">${t.name}</p>
+          </div>
+        `;
+      }).join('');
+
+      grid.querySelectorAll('.track-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const key = card.dataset.key;
+          if (selectedTracks.has(key)) selectedTracks.delete(key);
+          else selectedTracks.add(key);
+          renderGrid();
+          updateButtons();
+        });
+      });
+
+      updateButtons();
+    }
+
+    function updateButtons() {
+      const n = selectedTracks.size;
+      document.getElementById('selected-count').textContent = `${n} pista${n !== 1 ? 's' : ''} selecionada${n !== 1 ? 's' : ''}`;
+      document.getElementById('btn-sortear').disabled = n < 2;
+      document.getElementById('btn-salvar').disabled = !lastSorted;
+    }
+
+    document.getElementById('btn-sortear').addEventListener('click', () => {
+      const arr = [...selectedTracks];
+      if (arr.length < 2) return;
+      const winnerIdx = Math.floor(Math.random() * arr.length);
+      const winnerKey = arr[winnerIdx];
+      const winnerTrack = TRACKS.find(x => x.key === winnerKey);
+      if (!winnerTrack) return;
+      lastSorted = winnerTrack;
+
+      const selectedTracksList = arr.map(k => TRACKS.find(x => x.key === k)).filter(Boolean);
+      const modal = document.getElementById('sort-modal');
+      const strip = document.getElementById('sort-strip');
+      const viewport = document.getElementById('sort-viewport');
+      const phaseStrip = document.getElementById('sort-phase-strip');
+      const phaseWinner = document.getElementById('sort-phase-winner');
+      const winnerIcon = document.getElementById('sort-winner-icon');
+      const winnerName = document.getElementById('sort-winner-name');
+
+      phaseStrip.classList.remove('hidden');
+      phaseWinner.classList.remove('visible');
+
+      const CARD_W = 140;
+      const GAP = 16;
+      const SLOT = CARD_W + GAP;
+      const REPEAT = 18;
+      const LAPS_EXTRA = 6;
+      const fullStrip = [];
+      for (let r = 0; r < REPEAT; r++) {
+        selectedTracksList.forEach(t => fullStrip.push(t));
+      }
+      const winnerGlobalIdx = (REPEAT >> 1) * selectedTracksList.length + winnerIdx;
+      const startIdx = winnerGlobalIdx + selectedTracksList.length * LAPS_EXTRA;
+
+      strip.innerHTML = fullStrip.map(t => {
+        const imgPath = `src/assets/img/pistas/${t.img}`;
+        return `
+          <div class="flex-shrink-0 rounded-lg overflow-hidden border-2 border-white/20 bg-white/5" style="width:${CARD_W}px" data-key="${t.key}">
+            <div class="aspect-[4/3] overflow-hidden flex items-center justify-center">
+              <div class="w-full h-full bg-blm-red/90" style="mask-image:url('${imgPath}');-webkit-mask-image:url('${imgPath}');mask-size:contain;mask-repeat:no-repeat;mask-position:center;-webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;"></div>
+            </div>
+            <p class="text-center py-1 text-xs truncate px-1">${t.name}</p>
+          </div>
+        `;
+      }).join('');
+
+      strip.style.gap = GAP + 'px';
+      strip.style.transition = 'none';
+      strip.style.left = '0';
+      strip.style.visibility = 'hidden';
+      strip.style.transform = 'translateX(-9999px)';
+      modal.classList.add('open');
+
+      requestAnimationFrame(() => {
+        const vw = viewport.offsetWidth || 600;
+        const startX = vw / 2 - (startIdx * SLOT + CARD_W / 2);
+        const endX = vw / 2 - (winnerGlobalIdx * SLOT + CARD_W / 2);
+        strip.style.transform = `translateX(${startX}px)`;
+        strip.offsetHeight;
+        requestAnimationFrame(() => {
+          strip.style.visibility = 'visible';
+          strip.style.transition = 'transform 8s cubic-bezier(0.15, 0.85, 0.25, 1)';
+          strip.style.transform = `translateX(${endX}px)`;
+        });
+      });
+
+      function closeWinnerAndShowResult() {
+        const imgPath = `src/assets/img/pistas/${winnerTrack.img}`;
+        modal.classList.remove('open');
+        phaseWinner.classList.remove('visible');
+        const resultArea = document.getElementById('result-area');
+        const resultName = document.getElementById('result-name');
+        const resultIcon = document.getElementById('result-icon');
+        resultName.textContent = winnerTrack.name;
+        resultIcon.style.maskImage = `url('${imgPath}')`;
+        resultIcon.style.webkitMaskImage = `url('${imgPath}')`;
+        resultIcon.style.maskSize = 'contain';
+        resultIcon.style.maskRepeat = 'no-repeat';
+        resultIcon.style.maskPosition = 'center';
+        resultIcon.className = 'w-32 h-24 mx-auto mb-3 bg-blm-red rounded-lg result-flash';
+        resultArea.classList.remove('hidden');
+        updateButtons();
+      }
+
+      strip.ontransitionend = () => {
+        strip.ontransitionend = null;
+        const imgPath = `src/assets/img/pistas/${winnerTrack.img}`;
+        winnerIcon.style.maskImage = `url('${imgPath}')`;
+        winnerIcon.style.webkitMaskImage = `url('${imgPath}')`;
+        winnerName.textContent = winnerTrack.name;
+        phaseStrip.classList.add('hidden');
+        phaseWinner.classList.add('visible');
+      };
+
+      document.getElementById('btn-fechar-sorteio').onclick = closeWinnerAndShowResult;
+    });
+
+    document.getElementById('btn-salvar').addEventListener('click', async () => {
+      if (!lastSorted) return;
+      const supabase = getClient();
+      const { data: { user } } = await supabase?.auth.getUser() || {};
+      if (!user) return;
+      const btn = document.getElementById('btn-salvar');
+      const statusEl = document.getElementById('save-status');
+      const originalHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Salvando…';
+      statusEl.textContent = '';
+      statusEl.className = 'mt-6 text-center text-sm text-white/70';
+      try {
+        await supabase.from('site_content').upsert([
+          { key: 'ranking_pista_semana', value: `Pista da semana: ${lastSorted.name}`, updated_at: new Date().toISOString() },
+          { key: 'ranking_pista_key', value: lastSorted.key, updated_at: new Date().toISOString() }
+        ], { onConflict: 'key' });
+        statusEl.textContent = 'Salvo! O site foi atualizado.';
+        statusEl.className = 'mt-6 text-center text-sm text-green-400';
+      } catch (e) {
+        statusEl.textContent = 'Erro: ' + (e.message || e);
+        statusEl.className = 'mt-6 text-center text-sm text-red-400';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar no site';
+      }
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', async () => {
+      const s = getClient();
+      if (s) await s.auth.signOut();
+      document.getElementById('app').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+    });
+
+    document.getElementById('btn-login').addEventListener('click', async () => {
+      const supabase = getClient();
+      const statusEl = document.getElementById('login-status');
+      const configEl = document.getElementById('login-error-config');
+      configEl.classList.add('hidden');
+      if (!supabase) {
+        configEl.textContent = 'Edite src/js/config.js com a chave Supabase.';
+        configEl.classList.remove('hidden');
+        return;
+      }
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-password').value;
+      if (!email || !pass) { statusEl.textContent = 'Preencha email e senha.'; return; }
+      statusEl.textContent = 'Entrando…';
+      const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+      if (error) {
+        statusEl.textContent = error.message === 'Invalid login credentials' ? 'Email ou senha incorretos.' : error.message;
+        return;
+      }
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      renderGrid();
+    });
+
+    document.getElementById('login-password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('btn-login').click();
+    });
+
+    (async function init() {
+      if (!window.SUPABASE_ANON_KEY) {
+        document.getElementById('login-error-config').textContent = 'Edite src/js/config.js com a chave Supabase.';
+        document.getElementById('login-error-config').classList.remove('hidden');
+        return;
+      }
+      const supabase = getClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        renderGrid();
+      }
+    })();
+  </script>
+</body>
+</html>

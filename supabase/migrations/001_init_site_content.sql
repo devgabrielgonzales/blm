@@ -53,6 +53,7 @@ INSERT INTO site_content (key, value) VALUES
   ('ranking_title', 'RANKING OFICIAL'),
   ('ranking_subtitle', 'Ranking por pista, considerando apenas a temporada atual e apenas sessões de corrida.'),
   ('ranking_pista_semana', 'Pista da semana: Barcelona'),
+  ('ranking_pista_key', 'barcelona'),
   -- Community
   ('community_title', 'COMUNIDADE BLM'),
   ('community_description', 'Servidores monitorados para garantir um ambiente de treinamento agradável e sem estresse — ideal para quem está começando e também para quem quer voltar a competir com consistência.'),
