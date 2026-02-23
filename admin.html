@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel BLM — Editar Conteúdo</title>
+  <link rel="icon" type="image/png" href="src/assets/img/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="src/assets/img/favicon/favicon.svg" />
+  <link rel="shortcut icon" href="src/assets/img/favicon/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="src/assets/img/favicon/apple-touch-icon.png" />
+  <script src="src/js/config.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'blm-dark': '#000310',
+            'blm-black': '#0d0d0e',
+            'blm-red': '#fc0000',
+            'blm-gray': '#1a1a1c',
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: #000310;
+      background-image:
+        repeating-linear-gradient(-45deg, transparent 0, transparent 70px, rgba(252,0,0,0.03) 70px, rgba(252,0,0,0.03) 72px),
+        radial-gradient(ellipse 80% 50% at 20% 30%, rgba(252,0,0,0.06) 0%, transparent 50%),
+        radial-gradient(ellipse 60% 40% at 80% 70%, rgba(230,36,86,0.05) 0%, transparent 50%);
+      background-attachment: fixed;
+      background-size: 100% 100%, 100% 100%, 100% 100%;
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      margin: 0 0.5rem;
+      border-radius: 0.5rem;
+      color: rgba(255,255,255,0.75);
+      transition: all 0.2s;
+    }
+    .sidebar-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
+    .sidebar-link.active { background: rgba(252,0,0,0.15); color: #fc0000; }
+    .content-panel { display: none; }
+    .content-panel.active { display: block; }
+    .input-field {
+      width: 100%;
+      background: rgba(13,13,14,0.8);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 0.5rem;
+      padding: 0.625rem 1rem;
+      color: #fff;
+      font-size: 1rem;
+    }
+    .input-field::placeholder { color: rgba(255,255,255,0.4); }
+    .input-field:focus { outline: none; border-color: rgba(252,0,0,0.5); box-shadow: 0 0 0 2px rgba(252,0,0,0.15); }
+    textarea.input-field { min-height: 6rem; resize: vertical; }
+    .label { display: block; font-size: 0.875rem; font-weight: 500; color: rgba(255,255,255,0.7); margin-bottom: 0.375rem; }
+    .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 0.75rem; }
+    .img-upload { display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap; }
+    .img-upload .preview { width: 120px; height: 90px; border-radius: 0.5rem; overflow: hidden; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .img-upload .preview img { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .img-upload .preview .placeholder { color: rgba(255,255,255,0.4); font-size: 0.75rem; text-align: center; padding: 0.5rem; }
+    .img-upload .controls { flex: 1; min-width: 200px; }
+    .img-upload input[type="file"] { font-size: 0.875rem; color: rgba(255,255,255,0.8); }
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+    }
+  </style>
+</head>
+<body class="text-white min-h-screen antialiased">
+  <!-- Tela de login (exibida primeiro) -->
+  <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="card p-8 w-full max-w-md">
+      <div class="text-center mb-6">
+        <img src="src/assets/img/logo-pequena.png" alt="BLM" class="h-12 w-auto mx-auto mb-4">
+        <h2 class="text-xl font-bold text-white">Painel BLM</h2>
+        <p class="text-white/60 text-sm mt-1">Faça login para acessar o painel</p>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="label">Email</label>
+          <input type="email" id="login-email" class="input-field" placeholder="seu@email.com" autocomplete="email" />
+        </div>
+        <div>
+          <label class="label">Senha</label>
+          <input type="password" id="login-password" class="input-field" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+        <p id="login-status" class="text-sm text-red-400 min-h-[1.25rem]"></p>
+        <button type="button" id="btn-login" class="w-full px-5 py-3 bg-blm-red hover:bg-blm-red/90 rounded-lg font-semibold transition">
+          Entrar
+        </button>
+      </div>
+      <p id="login-error-config" class="mt-4 text-sm text-amber-400 text-center hidden"></p>
+    </div>
+  </div>
+
+  <!-- App (sidebar + conteúdo) — oculto até login -->
+  <div id="app" class="flex min-h-screen hidden">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar fixed lg:static inset-y-0 left-0 z-40 w-64 bg-blm-black/95 backdrop-blur border-r border-white/10 flex flex-col transition-transform duration-300">
+      <div class="p-5 border-b border-white/10">
+        <div class="flex items-center gap-3">
+          <img src="src/assets/img/logo-pequena.png" alt="BLM" class="h-9 w-auto">
+          <span class="font-bold text-base">Painel BLM</span>
+        </div>
+      </div>
+      <nav class="flex-1 overflow-y-auto py-4">
+        <a href="#" data-section="hero" class="sidebar-link">
+          <i class="fa-solid fa-flag w-5 shrink-0"></i>
+          <span>Hero</span>
+        </a>
+        <a href="#" data-section="quick" class="sidebar-link">
+          <i class="fa-solid fa-heading w-5 shrink-0"></i>
+          <span>Quick Title</span>
+        </a>
+        <a href="#" data-section="signposts" class="sidebar-link">
+          <i class="fa-solid fa-th-large w-5 shrink-0"></i>
+          <span>Cards Signpost</span>
+        </a>
+        <a href="#" data-section="ranking" class="sidebar-link">
+          <i class="fa-solid fa-trophy w-5 shrink-0"></i>
+          <span>Ranking</span>
+        </a>
+        <a href="#" data-section="community" class="sidebar-link">
+          <i class="fa-solid fa-users w-5 shrink-0"></i>
+          <span>Comunidade</span>
+        </a>
+        <a href="#" data-section="broadcast" class="sidebar-link">
+          <i class="fa-brands fa-youtube w-5 shrink-0"></i>
+          <span>Transmissões</span>
+        </a>
+        <a href="#" data-section="performance" class="sidebar-link">
+          <i class="fa-solid fa-gauge-high w-5 shrink-0"></i>
+          <span>BLM Performance</span>
+        </a>
+        <a href="#" data-section="support" class="sidebar-link">
+          <i class="fa-solid fa-heart w-5 shrink-0"></i>
+          <span>Apoiar BLM</span>
+        </a>
+        <a href="#" data-section="footer" class="sidebar-link">
+          <i class="fa-solid fa-copyright w-5 shrink-0"></i>
+          <span>Footer</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Overlay mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 z-30 lg:hidden hidden" aria-hidden="true"></div>
+
+    <!-- Main content -->
+    <main class="flex-1 flex flex-col min-w-0">
+      <!-- Header -->
+      <header class="sticky top-0 z-20 bg-blm-black/95 backdrop-blur border-b border-white/10 px-4 lg:px-8 py-4 flex items-center justify-between">
+        <button id="sidebar-toggle" class="lg:hidden p-2 rounded-lg hover:bg-white/10" aria-label="Menu">
+          <i class="fa-solid fa-bars text-xl"></i>
+        </button>
+        <h1 id="page-title" class="text-xl font-bold truncate">Hero</h1>
+        <div class="flex items-center gap-3">
+          <a href="index.html" target="_blank" class="px-4 py-2 bg-white/10 hover:bg-white/15 rounded-lg font-medium text-sm flex items-center gap-2">
+            <i class="fa-solid fa-external-link-alt"></i> Ver site
+          </a>
+          <button id="btn-save" type="button" class="px-4 py-2 bg-blm-red hover:bg-blm-red/90 rounded-lg font-semibold text-sm">
+            <i class="fa-solid fa-floppy-disk mr-2"></i>Salvar
+          </button>
+          <button id="btn-logout-header" class="px-4 py-2 bg-white/10 hover:bg-white/15 rounded-lg font-medium text-sm flex items-center gap-2">
+            <i class="fa-solid fa-right-from-bracket"></i> Sair
+          </button>
+        </div>
+      </header>
+
+      <!-- Content area -->
+      <div class="flex-1 overflow-y-auto p-6 lg:p-8">
+        <!-- Form panels (hidden until content loaded) -->
+        <div id="editor-wrapper" class="hidden">
+          <form id="content-form">
+            <!-- Hero -->
+            <div id="panel-hero" class="content-panel">
+              <div class="card p-6 space-y-4">
+                <h2 class="text-lg font-bold text-blm-red mb-4">Hero</h2>
+                <div class="img-upload-wrap">
+                  <label class="label">Logo</label>
+                  <div class="img-upload">
+                    <div class="preview"><img class="preview-img" alt="" style="display:none"><span class="placeholder">Sem imagem</span></div>
+                    <div class="controls">
+                      <input type="file" accept="image/*" class="img-file-input mb-2">
+                      <input type="text" name="hero_logo" class="input-field" placeholder="URL ou envie um arquivo acima">
+                    </div>
+                  </div>
+                </div>
+                <div><label class="label">Subtítulo</label><input type="text" name="hero_subtitle" class="input-field" /></div>
+                <div><label class="label">Título principal</label><input type="text" name="hero_title" class="input-field" /></div>
+                <div><label class="label">Descrição</label><textarea name="hero_description" rows="3" class="input-field"></textarea></div>
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div><label class="label">Botão Discord</label><input type="text" name="hero_cta_discord" class="input-field" /></div>
+                  <div><label class="label">Botão Ranking</label><input type="text" name="hero_cta_ranking" class="input-field" /></div>
+                </div>
+                <div class="grid sm:grid-cols-3 gap-4">
+                  <div><label class="label">Destaque 1</label><input type="text" name="hero_feature1" class="input-field" /></div>
+                  <div><label class="label">Destaque 2</label><input type="text" name="hero_feature2" class="input-field" /></div>
+                  <div><label class="label">Destaque 3</label><input type="text" name="hero_feature3" class="input-field" /></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Title -->
+            <div id="panel-quick" class="content-panel">
+              <div class="card p-6 space-y-4">
+                <h2 class="text-lg font-bold text-blm-red mb-4">Quick Title</h2>
+                <div><label class="label">Label</label><input type="text" name="quick_label" class="input-field" /></div>
+                <div><label class="label">Título</label><input type="text" name="quick_title" class="input-field" /></div>
+              </div>
+            </div>
+
+            <!-- Signposts -->
+            <div id="panel-signposts" class="content-panel">
+              <div class="card p-6 space-y-6">
+                <h2 class="text-lg font-bold text-blm-red mb-4">Cards de Seção</h2>
+                <div class="grid sm:grid-cols-2 gap-6">
+                  <div class="border-l-2 border-blm-red pl-4 space-y-3">
+                    <h4 class="font-semibold">Card 1 — Ranking</h4>
+                    <div class="img-upload-wrap">
+                      <label class="label">Imagem</label>
+                      <div class="img-upload">
+                        <div class="preview"><img class="preview-img" alt="" style="display:none"><span class="placeholder">Sem imagem</span></div>
+                        <div class="controls"><input type="file" accept="image/*" class="img-file-input mb-2"><input type="text" name="signpost1_image" class="input-field" placeholder="URL ou envie arquivo"></div>
+                      </div>
+                    </div>
+                    <div><label class="label">Título</label><input type="text" name="signpost1_title" class="input-field" /></div>
+                    <div><label class="label">Subtítulo</label><input type="text" name="signpost1_subtitle" class="input-field" /></div>
+                  </div>
+                  <div class="border-l-2 border-blm-red pl-4 space-y-3">
+                    <h4 class="font-semibold">Card 2 — Comunidade</h4>
+                    <div class="img-upload-wrap">
+                      <label class="label">Imagem</label>
+                      <div class="img-upload">
+                        <div class="preview"><img class="preview-img" alt="" style="display:none"><span class="placeholder">Sem imagem</span></div>
+                        <div class="controls"><input type="file" accept="image/*" class="img-file-input mb-2"><input type="text" name="signpost2_image" class="input-field" placeholder="URL ou envie arquivo"></div>
+                      </div>
+                    </div>
+                    <div><label class="label">Título</label><input type="text" name="signpost2_title" class="input-field" /></div>
+                    <div><label class="label">Subtítulo</label><input type="text" name="signpost2_subtitle" class="input-field" /></div>
+                  </div>
+                  <div class="border-l-2 border-blm-red pl-4 space-y-3">
+                    <h4 class="font-semibold">Card 3 — Transmissões</h4>
+                    <div class="img-upload-wrap">
+                      <label class="label">Imagem</label>
+                      <div class="img-upload">
+                        <div class="preview"><img class="preview-img" alt="" style="display:none"><span class="placeholder">Sem imagem</span></div>
+                        <div class="controls"><input type="file" accept="image/*" class="img-file-input mb-2"><input type="text" name="signpost3_image" class="input-field" placeholder="URL ou envie arquivo"></div>
+                      </div>
+                    </div>
+                    <div><label class="label">Título</label><input type="text" name="signpost3_title" class="input-field" /></div>
+                    <div><label class="label">Subtítulo</label><input type="text" name="signpost3_subtitle" class="input-field" /></div>
+                  </div>
+                  <div class="border-l-2 border-blm-red pl-4 space-y-3">
+                    <h4 class="font-semibold">Card 4 — Performance</h4>
+                    <div class="img-upload-wrap">
+                      <label class="label">Imagem</label>
+                      <div class="img-upload">
+                        <div class="preview"><img class="preview-img" alt="" style="display:none"><span class="placeholder">Sem imagem</span></div>
+                        <div class="controls"><input type="file" accept="image/*" class="img-file-input mb-2"><input type="text" name="signpost4_image" class="input-field" placeholder="URL ou envie arquivo"></div>
+                      </div>
+                    </div>
+                    <div><label class="label">Título</label><input type="text" name="signpost4_title" class="input-field" /></div>
+                    <div><label class="label">Subtítulo</label><input type="text" name="signpost4_subtitle" class="input-field" /></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Ranking -->
+            <div id="panel-ranking" class="content-panel">
+              <div class="card p-6 space-y-4">
+                <h2 class="text-lg font-bold text-blm-red mb-4">Ranking</h2>
+                <div><label class="label">Título</label><input type="text" name="ranking_title" class="input-field" /></div>
+                <div><label class="label">Subtítulo</label><textarea name="ranking_subtitle" rows="2" class="input-field"></textarea></div>
+                <div><label class="label">Pista da semana</label><input type="text" name="ranking_pista_semana" class="input-field" placeholder="Pista da semana: Barcelona" /></div>
+              </div>
+            </div>
+
+            <!-- Community -->
+            <div id="panel-community" class="content-panel">
+              <div class="card p-6 space-y-4">
+                <h2 class="text-lg font-bold text-blm-red mb-4">Comunidade</h2>
+                <div><label class="label">Título</label><input type="text" name="community_title" class="input-field" /></div>
+                <div><label class="label">Descrição</label><textarea name="community_description" rows="3" class="input-field"></textarea></div>
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div><label class="label">Card 1 — Título</label><input type="text" name="community_card1_title" class="input-field" /></div>
+                  <div><label class="label">Card 1 — Texto</label><input type="text" name="community_card1_text" class="input-field" /></div>
+                  <div><label class="label">Card 2 — Título</label><input type="text" name="community_card2_title" class="input-field" /></div>
+                  <div><label class="label">Card 2 — Texto</label><input type="text" name="community_card2_text" class="input-field" /></div>
+                  <div><label class="label">Card 3 — Título</label><input type="text" name="community_card3_title" class="input-field" /></div>
+                  <div><label class="label">Card 3 — Texto</label><input type="text" name="community_card3_text" class="input-field" /></div>
+                  <div><label class="label">Card 4 — Título</label><input type="text" name="community_card4_title" class="input-field" /></div>
+                  <div><label class="label">Card 4 — Texto</label><input type="text" name="community_card4_text" class="input-field" /></div>
+                </div>
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div><label class="label">Botão Discord</label><input type="text" name="community_cta_discord" class="input-field" /></div>
+                  <div><label class="label">Botão Performance</label><input type="text" name="community_cta_performance" class="input-field" /></div>
+                </div>
+                <div class="img-upload-wrap">
+                  <label class="label">Imagem da seção</label>
+                  <div class="img-upload">
+                    <div class="preview"><img class="preview-img" alt="" style="display:none"><span class="placeholder">Sem imagem</span></div>
+                    <div class="controls"><input type="file" accept="image/*" class="img-file-input mb-2"><input type="text" name="community_image" class="input-field" placeholder="URL ou envie arquivo"></div>
+                  </div>
+                </div>
+                <div><label class="label">Objetivo — Título</label><input type="text" name="community_objective_title" class="input-field" /></div>
+                <div><label class="label">Objetivo — Texto</label><input type="text" name="community_objective_text" class="input-field" /></div>
+              </div>
+            </div>
+
+            <!-- Broadcast -->
+            <div id="panel-broadcast" class="content-panel">
+              <div class="card p-6 space-y-4">
+                <h2 class="text-lg font-bold text-blm-red mb-4">Transmissões</h2>
+                <div><label class="label">Título</label><input type="text" name="broadcast_title" class="input-field" /></div>
+                <div><label class="label">Descrição</label><textarea name="broadcast_description" rows="2" class="input-field"></textarea></div>
+                <div><label class="label">Texto do botão</label><input type="text" name="broadcast_cta" class="input-field" /></div>
+                <div><label class="label">ID do vídeo YouTube</label><input type="text" name="broadcast_video_id" class="input-field" placeholder="ex: LL2NUmtoEzA" /></div>
+                <div><label class="label">Título do embed</label><input type="text" name="broadcast_video_title" class="input-field" /></div>
+              </div>
+            </div>
+
+            <!-- Performance -->
+            <div id="panel-performance" class="content-panel">
+              <div class="card p-6 space-y-4">
+                <h2 class="text-lg font-bold text-blm-red mb-4">BLM Performance</h2>
+                <div><label class="label">Título</label><input type="text" name="performance_title" class="input-field" /></div>
+                <div><label class="label">Subtítulo</label><textarea name="performance_subtitle" rows="2" class="input-field"></textarea></div>
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div><label class="label">Card 1 — Título</label><input type="text" name="performance_card1_title" class="input-field" /></div>
+                  <div class="sm:col-span-2"><label class="label">Card 1 — Itens (um por linha)</label><textarea name="performance_card1_items" rows="4" class="input-field"></textarea></div>
+                  <div><label class="label">Card 2 — Título</label><input type="text" name="performance_card2_title" class="input-field" /></div>
+                  <div class="sm:col-span-2"><label class="label">Card 2 — Itens (um por linha)</label><textarea name="performance_card2_items" rows="4" class="input-field"></textarea></div>
+                  <div class="sm:col-span-2"><label class="label">Rodapé card 2</label><input type="text" name="performance_card2_footer" class="input-field" /></div>
+                  <div><label class="label">Card 3 — Título</label><input type="text" name="performance_card3_title" class="input-field" /></div>
+                  <div class="sm:col-span-2"><label class="label">Card 3 — Itens (um por linha)</label><textarea name="performance_card3_items" rows="3" class="input-field"></textarea></div>
+                  <div><label class="label">Texto do botão</label><input type="text" name="performance_cta" class="input-field" /></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Support -->
+            <div id="panel-support" class="content-panel">
+              <div class="card p-6 space-y-4">
+                <h2 class="text-lg font-bold text-blm-red mb-4">Apoiar BLM</h2>
+                <div><label class="label">Título</label><input type="text" name="support_title" class="input-field" /></div>
+                <div><label class="label">Descrição</label><textarea name="support_description" rows="2" class="input-field"></textarea></div>
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div><label class="label">Chave PIX</label><input type="text" name="support_pix_key" class="input-field" /></div>
+                  <div><label class="label">Nome titular PIX</label><input type="text" name="support_pix_name" class="input-field" /></div>
+                  <div><label class="label">Email PayPal</label><input type="text" name="support_paypal" class="input-field" /></div>
+                  <div class="img-upload-wrap">
+                    <label class="label">QR Code PIX</label>
+                    <div class="img-upload">
+                      <div class="preview"><img class="preview-img" alt="" style="display:none"><span class="placeholder">Sem imagem</span></div>
+                      <div class="controls"><input type="file" accept="image/*" class="img-file-input mb-2"><input type="text" name="support_qrcode_image" class="input-field" placeholder="URL ou envie arquivo"></div>
+                    </div>
+                  </div>
+                </div>
+                <div><label class="label">Título Transparência</label><input type="text" name="support_transparency_title" class="input-field" /></div>
+                <div><label class="label">Texto Transparência</label><input type="text" name="support_transparency_text" class="input-field" /></div>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div id="panel-footer" class="content-panel">
+              <div class="card p-6 space-y-4">
+                <h2 class="text-lg font-bold text-blm-red mb-4">Footer</h2>
+                <div><label class="label">Copyright (use {year} para ano atual)</label><input type="text" name="footer_copyright" class="input-field" /></div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div id="loading-msg" class="flex flex-col items-center justify-center py-16 text-white/60">
+          <i class="fa-solid fa-spinner fa-spin text-4xl mb-4"></i>
+          <p>Carregando…</p>
+        </div>
+      </div>
+
+      <div id="save-status" class="fixed bottom-6 right-6 px-4 py-3 rounded-lg shadow-lg text-sm font-medium hidden"></div>
+    </main>
+  </div>
+
+  <script type="module">
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    const getClient = () => window.SUPABASE_ANON_KEY ? createClient('https://bsnnvsdzwqdthrrubbko.supabase.co', window.SUPABASE_ANON_KEY) : null;
+
+    const TITLES = { hero: 'Hero', quick: 'Quick Title', signposts: 'Cards Signpost', ranking: 'Ranking', community: 'Comunidade', broadcast: 'Transmissões', performance: 'BLM Performance', support: 'Apoiar BLM', footer: 'Footer' };
+
+    function showSection(id) {
+      document.querySelectorAll('.content-panel').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+      const panel = document.getElementById('panel-' + id);
+      const link = document.querySelector('[data-section="' + id + '"]');
+      if (panel) panel.classList.add('active');
+      if (link) link.classList.add('active');
+      document.getElementById('page-title').textContent = TITLES[id] || id;
+    }
+
+    document.querySelectorAll('.sidebar-link[data-section]').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const id = link.dataset.section;
+        showSection(id);
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebar-overlay').classList.add('hidden');
+      });
+    });
+
+    document.getElementById('sidebar-toggle').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebar-overlay').classList.toggle('hidden');
+    });
+    document.getElementById('sidebar-overlay').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.add('hidden');
+    });
+
+    const STORAGE_BUCKET = 'site-images';
+
+    function updateImagePreview(wrap, url) {
+      const preview = wrap.querySelector('.preview');
+      const img = preview?.querySelector('.preview-img');
+      const placeholder = preview?.querySelector('.placeholder');
+      if (!img || !placeholder) return;
+      const hasUrl = url && (url.startsWith('http') || url.startsWith('data:'));
+      if (hasUrl) {
+        img.src = url;
+        img.style.display = '';
+        placeholder.style.display = 'none';
+        img.onerror = () => { img.style.display = 'none'; placeholder.textContent = 'Erro ao carregar'; placeholder.style.display = ''; };
+      } else {
+        img.style.display = 'none';
+        placeholder.textContent = 'Sem imagem';
+        placeholder.style.display = '';
+      }
+    }
+
+    function initImageUploads() {
+      document.querySelectorAll('.img-upload-wrap').forEach(wrap => {
+        const urlInput = wrap.querySelector('input[type="text"][name]');
+        const fileInput = wrap.querySelector('.img-file-input');
+        if (!urlInput || !fileInput) return;
+        updateImagePreview(wrap, urlInput.value);
+        urlInput.addEventListener('input', () => updateImagePreview(wrap, urlInput.value));
+        fileInput.addEventListener('change', async (e) => {
+          const file = e.target.files?.[0];
+          if (!file || !file.type.startsWith('image/')) return;
+          const supabase = getClient();
+          const { data: { user } } = await supabase?.auth.getUser() || {};
+          if (!supabase || !user) { showToast('Faça login para enviar imagens.', 'error'); return; }
+          fileInput.disabled = true;
+          try {
+            const ext = file.name.split('.').pop() || 'png';
+            const path = `site-content/${urlInput.name}-${Date.now()}.${ext}`;
+            const { error } = await supabase.storage.from(STORAGE_BUCKET).upload(path, file, { upsert: true });
+            if (error) throw error;
+            const { data: { publicUrl } } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(path);
+            urlInput.value = publicUrl;
+            updateImagePreview(wrap, publicUrl);
+            showToast('Imagem enviada! Clique em Salvar para aplicar.');
+          } catch (err) {
+            showToast('Erro no upload: ' + (err.message || err), 'error');
+            if (err.message?.includes('Bucket') || err.message?.includes('bucket')) {
+              showToast('Crie o bucket "site-images" no Supabase Storage (público).', 'error');
+            }
+          } finally {
+            fileInput.disabled = false;
+            fileInput.value = '';
+          }
+        });
+      });
+    }
+
+    function populateForm(map) {
+      document.querySelectorAll('#content-form [name]').forEach(el => {
+        const val = map[el.name];
+        if (val != null) {
+          el.value = el.tagName === 'TEXTAREA' && el.name.includes('_items') ? String(val).replace(/\|/g, '\n') : val;
+        }
+      });
+    }
+
+    function collectForm() {
+      const map = {};
+      document.querySelectorAll('#content-form [name]').forEach(el => {
+        let v = el.value.trim();
+        if (el.tagName === 'TEXTAREA' && el.name.includes('_items')) v = v.split(/\n/).map(s => s.trim()).filter(Boolean).join('|');
+        map[el.name] = v;
+      });
+      return map;
+    }
+
+    function showToast(msg, type = 'success') {
+      const el = document.getElementById('save-status');
+      el.textContent = msg;
+      el.className = 'fixed bottom-6 right-6 px-4 py-3 rounded-lg shadow-lg text-sm font-medium ' + (type === 'error' ? 'bg-red-600 text-white' : 'bg-green-600 text-white');
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 3500);
+    }
+
+    async function loadContent() {
+      const supabase = getClient();
+      const loading = document.getElementById('loading-msg');
+      const editor = document.getElementById('editor-wrapper');
+      if (!supabase) return;
+      try {
+        const { data, error } = await supabase.from('site_content').select('key, value');
+        if (error) throw error;
+        const map = Object.fromEntries((data || []).map(r => [r.key, r.value ?? '']));
+        populateForm(map);
+        initImageUploads();
+        editor.classList.remove('hidden');
+        loading.classList.add('hidden');
+        showSection('hero');
+      } catch (e) {
+        loading.innerHTML = '<p class="text-red-400">Erro: ' + (e.message || e) + '</p>';
+      }
+    }
+
+    function showApp() {
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      loadContent();
+    }
+
+    document.getElementById('btn-save').addEventListener('click', async (e) => {
+      e.preventDefault();
+      const supabase = getClient();
+      const btn = document.getElementById('btn-save');
+      if (!supabase) return;
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { showToast('Faça login para salvar.', 'error'); return; }
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Salvando…';
+      try {
+        const map = collectForm();
+        for (const [k, v] of Object.entries(map)) {
+          const { error } = await supabase.from('site_content').upsert({ key: k, value: v, updated_at: new Date().toISOString() }, { onConflict: 'key' });
+          if (error) throw error;
+        }
+        showToast('Salvo com sucesso!');
+      } catch (err) {
+        showToast('Erro: ' + (err.message || err), 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-floppy-disk mr-2"></i>Salvar';
+      }
+    });
+
+    document.getElementById('btn-reload')?.addEventListener('click', loadContent);
+
+    document.getElementById('btn-login').addEventListener('click', async () => {
+      const supabase = getClient();
+      const statusEl = document.getElementById('login-status');
+      const configEl = document.getElementById('login-error-config');
+      configEl.classList.add('hidden');
+      if (!supabase) {
+        configEl.textContent = 'Chave Supabase não configurada. Edite src/js/config.js';
+        configEl.classList.remove('hidden');
+        return;
+      }
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-password').value;
+      if (!email || !pass) { statusEl.textContent = 'Preencha email e senha.'; return; }
+      statusEl.textContent = 'Entrando…';
+      statusEl.className = 'text-sm text-white/70 min-h-[1.25rem]';
+      const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+      if (error) {
+        const msg = error.message === 'Invalid login credentials' ? 'Email ou senha incorretos.' : error.message;
+        statusEl.textContent = msg;
+        statusEl.className = 'text-sm text-red-400 min-h-[1.25rem]';
+        return;
+      }
+      showApp();
+    });
+
+    document.getElementById('login-password').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-login').click();
+    });
+
+    async function logout() {
+      const s = getClient();
+      if (s) await s.auth.signOut();
+      document.getElementById('app').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+      document.getElementById('login-email').value = '';
+      document.getElementById('login-password').value = '';
+      document.getElementById('login-status').textContent = '';
+    }
+    document.getElementById('btn-logout-header').addEventListener('click', logout);
+
+    // Ao carregar: se já logado, vai direto para o app
+    (async function init() {
+      if (!window.SUPABASE_ANON_KEY) {
+        document.getElementById('login-error-config').textContent = 'Edite src/js/config.js com a chave Supabase.';
+        document.getElementById('login-error-config').classList.remove('hidden');
+        return;
+      }
+      const supabase = getClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) showApp();
+    })();
+  </script>
+</body>
+</html>

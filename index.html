@@ -38,6 +38,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <script src="src/js/config.js"></script>
 
   <style>
     html { scroll-behavior: smooth; }
@@ -358,19 +359,19 @@
 
     <div class="relative z-10 w-full max-w-7xl px-4 flex flex-col items-center text-center">
       <div class="scroll-animate mb-6" data-animate="race-left-in" data-delay="150">
-        <img src="src/assets/img/logo-grande.png" alt="Brasil Legends Motorsport"
+        <img data-content-key="hero_logo" src="src/assets/img/logo-grande.png" alt="Brasil Legends Motorsport"
              class="h-auto w-auto max-w-[85vw] md:max-w-[520px] lg:max-w-[720px] xl:max-w-[920px] mx-auto opacity-95 object-contain">
       </div>
 
-      <p class="hidden md:block text-base md:text-lg text-white/85 mb-3 uppercase tracking-[0.35em] scroll-animate" data-animate="race-left-in" data-delay="280">
+      <p data-content-key="hero_subtitle" class="hidden md:block text-base md:text-lg text-white/85 mb-3 uppercase tracking-[0.35em] scroll-animate" data-animate="race-left-in" data-delay="280">
         Assetto Corsa Competizione • Servidores Monitorados • Comunidade
       </p>
 
-      <h1 class="font-racing text-2xl sm:text-3xl md:text-5xl font-bold tracking-wider sm:tracking-widest mb-6 scroll-animate" data-animate="race-left-in" data-delay="410">
+      <h1 data-content-key="hero_title" class="font-racing text-2xl sm:text-3xl md:text-5xl font-bold tracking-wider sm:tracking-widest mb-6 scroll-animate" data-animate="race-left-in" data-delay="410">
         A melhor experiência de simulação<br class="hidden md:block"> para quem quer evoluir no ACC
       </h1>
 
-      <p class="hidden md:block text-lg md:text-xl text-white/80 max-w-3xl mb-10 leading-relaxed scroll-animate" data-animate="race-left-in" data-delay="540">
+      <p data-content-key="hero_description" class="hidden md:block text-lg md:text-xl text-white/80 max-w-3xl mb-10 leading-relaxed scroll-animate" data-animate="race-left-in" data-delay="540">
         Ambiente sem estresse para treinar, evoluir e competir com respeito. Ranking por pista, temporada atual e
         acompanhamento real para pilotos que querem constância e performance.
       </p>
@@ -378,18 +379,18 @@
       <div class="flex flex-col sm:flex-row gap-3 scroll-animate" data-animate="race-left-in" data-delay="670">
         <a href="https://discord.gg/43ZtcMK3um" target="_blank"
            class="button">
-          <i class="fa-brands fa-discord text-xl"></i> Entrar no Discord
+          <i class="fa-brands fa-discord text-xl"></i> <span data-content-key="hero_cta_discord">Entrar no Discord</span>
         </a>
         <a href="#ranking"
            class="button-outline">
-          <i data-lucide="trophy" class="w-5 h-5 inline"></i> Ver Ranking
+          <i data-lucide="trophy" class="w-5 h-5 inline"></i> <span data-content-key="hero_cta_ranking">Ver Ranking</span>
         </a>
       </div>
 
       <div class="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-white/60 scroll-animate" data-animate="race-left-in" data-delay="800">
-        <div class="flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4 text-white/70"></i> Moderação ativa</div>
-        <div class="flex items-center gap-2"><i data-lucide="gauge" class="w-4 h-4 text-white/70"></i> Métricas por pista</div>
-        <div class="flex items-center gap-2"><i data-lucide="flag" class="w-4 h-4 text-white/70"></i> Resultados reais</div>
+        <div class="flex items-center gap-2"><i data-lucide="shield-check" class="w-4 h-4 text-white/70"></i> <span data-content-key="hero_feature1">Moderação ativa</span></div>
+        <div class="flex items-center gap-2"><i data-lucide="gauge" class="w-4 h-4 text-white/70"></i> <span data-content-key="hero_feature2">Métricas por pista</span></div>
+        <div class="flex items-center gap-2"><i data-lucide="flag" class="w-4 h-4 text-white/70"></i> <span data-content-key="hero_feature3">Resultados reais</span></div>
       </div>
     </div>
   </header>
@@ -398,8 +399,8 @@
   <section class="relative py-14 px-4 text-center bg-blm-dark">
     <div class="absolute inset-x-0 -top-24 h-24 pointer-events-none" style="background: linear-gradient(to bottom, transparent, #000310);"></div>
     <div class="max-w-4xl mx-auto scroll-animate" data-animate="race-up">
-      <p class="text-xs uppercase tracking-[0.35em] text-white/60 mb-3">Brasil Legends Motorsport</p>
-      <p class="text-2xl md:text-3xl text-blm-red font-semibold uppercase tracking-wider">
+      <p data-content-key="quick_label" class="text-xs uppercase tracking-[0.35em] text-white/60 mb-3">Brasil Legends Motorsport</p>
+      <p data-content-key="quick_title" class="text-2xl md:text-3xl text-blm-red font-semibold uppercase tracking-wider">
         Ranking oficial • servidores • transmissões • performance
       </p>
     </div>
@@ -410,45 +411,45 @@
     <div class="max-w-7xl mx-auto">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <a href="#ranking" class="signpost-card group block relative overflow-hidden rounded-lg aspect-[4/5] border border-white/10 scroll-animate" data-animate="race-scale" data-delay="0">
-          <img src="src/assets/img/banner 1.png"
+          <img data-content-key="signpost1_image" src="src/assets/img/banner 1.png"
                alt="Ranking" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
           <div class="absolute bottom-0 left-0 right-0 p-6">
-            <h3 class="font-racing text-2xl font-bold uppercase">Ranking</h3>
-            <p class="text-white/75 mt-2">Por pista • temporada atual • categorias por %</p>
+            <h3 data-content-key="signpost1_title" class="font-racing text-2xl font-bold uppercase">Ranking</h3>
+            <p data-content-key="signpost1_subtitle" class="text-white/75 mt-2">Por pista • temporada atual • categorias por %</p>
             <i data-lucide="arrow-up-right" class="w-6 h-6 absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity"></i>
           </div>
         </a>
 
         <a href="#community" class="signpost-card group block relative overflow-hidden rounded-lg aspect-[4/5] border border-white/10 scroll-animate" data-animate="race-scale" data-delay="80">
-          <img src="src/assets/img/banner 2.png"
+          <img data-content-key="signpost2_image" src="src/assets/img/banner 2.png"
                alt="Comunidade" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
           <div class="absolute bottom-0 left-0 right-0 p-6">
-            <h3 class="font-racing text-2xl font-bold uppercase">Comunidade</h3>
-            <p class="text-white/75 mt-2">Ambiente monitorado • respeito • evolução</p>
+            <h3 data-content-key="signpost2_title" class="font-racing text-2xl font-bold uppercase">Comunidade</h3>
+            <p data-content-key="signpost2_subtitle" class="text-white/75 mt-2">Ambiente monitorado • respeito • evolução</p>
             <i data-lucide="arrow-up-right" class="w-6 h-6 absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity"></i>
           </div>
         </a>
 
         <a href="#broadcast" class="signpost-card group block relative overflow-hidden rounded-lg aspect-[4/5] border border-white/10 scroll-animate" data-animate="race-scale" data-delay="160">
-          <img src="src/assets/img/banner 3.png"
+          <img data-content-key="signpost3_image" src="src/assets/img/banner 3.png"
                alt="Transmissões" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
           <div class="absolute bottom-0 left-0 right-0 p-6">
-            <h3 class="font-racing text-2xl font-bold uppercase">Transmissões</h3>
-            <p class="text-white/75 mt-2">Narração ACC • campeonatos • highlights</p>
+            <h3 data-content-key="signpost3_title" class="font-racing text-2xl font-bold uppercase">Transmissões</h3>
+            <p data-content-key="signpost3_subtitle" class="text-white/75 mt-2">Narração ACC • campeonatos • highlights</p>
             <i data-lucide="arrow-up-right" class="w-6 h-6 absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity"></i>
           </div>
         </a>
 
         <a href="#performance" class="signpost-card group block relative overflow-hidden rounded-lg aspect-[4/5] border border-white/10 scroll-animate" data-animate="race-scale" data-delay="240">
-          <img src="src/assets/img/banner 4.png"
+          <img data-content-key="signpost4_image" src="src/assets/img/banner 4.png"
                alt="BLM Performance" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
           <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
           <div class="absolute bottom-0 left-0 right-0 p-6">
-            <h3 class="font-racing text-2xl font-bold uppercase">BLM Performance</h3>
-            <p class="text-white/75 mt-2">Acompanhamento individual • metas • métricas</p>
+            <h3 data-content-key="signpost4_title" class="font-racing text-2xl font-bold uppercase">BLM Performance</h3>
+            <p data-content-key="signpost4_subtitle" class="text-white/75 mt-2">Acompanhamento individual • metas • métricas</p>
             <i data-lucide="arrow-up-right" class="w-6 h-6 absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity"></i>
           </div>
         </a>
@@ -462,8 +463,8 @@
     <div class="max-w-7xl mx-auto">
       <div class="flex flex-col lg:flex-row items-start lg:items-end justify-between gap-6 mb-10 scroll-animate" data-animate="race-up">
         <div class="min-w-0">
-          <h2 class="font-racing text-2xl sm:text-3xl md:text-5xl font-bold tracking-wider sm:tracking-widest text-blm-red">RANKING OFICIAL</h2>
-          <p class="text-lg text-white/80 mt-3 max-w-2xl">
+          <h2 data-content-key="ranking_title" class="font-racing text-2xl sm:text-3xl md:text-5xl font-bold tracking-wider sm:tracking-widest text-blm-red">RANKING OFICIAL</h2>
+          <p data-content-key="ranking_subtitle" class="text-lg text-white/80 mt-3 max-w-2xl">
             Ranking por pista, considerando apenas a temporada atual e apenas sessões de corrida.
           </p>
         </div>
@@ -571,50 +572,50 @@
   <section id="community" class="py-24 px-4 border-t border-white/10">
     <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-14 items-center">
       <div class="scroll-animate" data-animate="race-in">
-        <h2 class="font-racing text-2xl sm:text-3xl md:text-5xl font-bold tracking-wider sm:tracking-widest text-blm-red">COMUNIDADE BLM</h2>
-        <p class="text-lg text-white/85 leading-relaxed mt-6">
+        <h2 data-content-key="community_title" class="font-racing text-2xl sm:text-3xl md:text-5xl font-bold tracking-wider sm:tracking-widest text-blm-red">COMUNIDADE BLM</h2>
+        <p data-content-key="community_description" class="text-lg text-white/85 leading-relaxed mt-6">
           Servidores monitorados para garantir um ambiente de treinamento agradável e sem estresse — ideal para quem está começando
           e também para quem quer voltar a competir com consistência.
         </p>
 
         <div class="mt-8 grid sm:grid-cols-2 gap-4">
           <div class="rounded-lg border border-white/10 bg-white/5 p-5">
-            <p class="font-semibold uppercase tracking-wider text-sm text-white/70">Foco no respeito</p>
-            <p class="text-white/80 mt-2">Regras claras e moderação ativa.</p>
+            <p data-content-key="community_card1_title" class="font-semibold uppercase tracking-wider text-sm text-white/70">Foco no respeito</p>
+            <p data-content-key="community_card1_text" class="text-white/80 mt-2">Regras claras e moderação ativa.</p>
           </div>
           <div class="rounded-lg border border-white/10 bg-white/5 p-5">
-            <p class="font-semibold uppercase tracking-wider text-sm text-white/70">Evolução real</p>
-            <p class="text-white/80 mt-2">Treino com métricas, metas e método.</p>
+            <p data-content-key="community_card2_title" class="font-semibold uppercase tracking-wider text-sm text-white/70">Evolução real</p>
+            <p data-content-key="community_card2_text" class="text-white/80 mt-2">Treino com métricas, metas e método.</p>
           </div>
           <div class="rounded-lg border border-white/10 bg-white/5 p-5">
-            <p class="font-semibold uppercase tracking-wider text-sm text-white/70">Servidores BLM</p>
-            <p class="text-white/80 mt-2">Corridas organizadas e estáveis.</p>
+            <p data-content-key="community_card3_title" class="font-semibold uppercase tracking-wider text-sm text-white/70">Servidores BLM</p>
+            <p data-content-key="community_card3_text" class="text-white/80 mt-2">Corridas organizadas e estáveis.</p>
           </div>
           <div class="rounded-lg border border-white/10 bg-white/5 p-5">
-            <p class="font-semibold uppercase tracking-wider text-sm text-white/70">Para iniciantes</p>
-            <p class="text-white/80 mt-2">Ambiente seguro pra aprender sem medo.</p>
+            <p data-content-key="community_card4_title" class="font-semibold uppercase tracking-wider text-sm text-white/70">Para iniciantes</p>
+            <p data-content-key="community_card4_text" class="text-white/80 mt-2">Ambiente seguro pra aprender sem medo.</p>
           </div>
         </div>
 
         <div class="mt-10 flex flex-col sm:flex-row gap-3">
           <a href="https://discord.gg/43ZtcMK3um" target="_blank"
              class="button">
-            <i class="fa-brands fa-discord"></i> Entrar no Discord
+            <i class="fa-brands fa-discord"></i> <span data-content-key="community_cta_discord">Entrar no Discord</span>
           </a>
           <a href="#performance"
              class="button-outline">
-            <i data-lucide="zap" class="w-4 h-4 inline"></i> BLM Performance
+            <i data-lucide="zap" class="w-4 h-4 inline"></i> <span data-content-key="community_cta_performance">BLM Performance</span>
           </a>
         </div>
       </div>
 
       <div class="relative scroll-animate" data-animate="race-in">
-        <img class="w-full rounded-lg border border-white/10"
+        <img data-content-key="community_image" class="w-full rounded-lg border border-white/10"
              src="src/assets/img/banner comunidade.jpg"
              alt="Comunidade BLM" />
         <div class="absolute -bottom-6 -left-6 bg-blm-black/80 border border-white/10 rounded-lg p-5 max-w-xs hidden md:block">
-          <p class="text-sm uppercase tracking-wider text-white/60">Objetivo BLM</p>
-          <p class="mt-2 text-white/85">Incluir novos jogadores e atrair pilotos experientes de volta para uma experiência única.</p>
+          <p data-content-key="community_objective_title" class="text-sm uppercase tracking-wider text-white/60">Objetivo BLM</p>
+          <p data-content-key="community_objective_text" class="mt-2 text-white/85">Incluir novos jogadores e atrair pilotos experientes de volta para uma experiência única.</p>
         </div>
       </div>
     </div>
@@ -624,14 +625,14 @@
   <section id="broadcast" class="py-24 px-4 border-t border-white/10 overflow-x-hidden">
     <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-14 items-center min-w-0">
       <div class="scroll-animate min-w-0" data-animate="race-in">
-        <h2 class="font-racing text-2xl sm:text-3xl md:text-5xl font-bold tracking-wider sm:tracking-widest text-blm-red">TRANSMISSÕES</h2>
-        <p class="text-lg text-white/85 leading-relaxed mt-6">
+        <h2 data-content-key="broadcast_title" class="font-racing text-2xl sm:text-3xl md:text-5xl font-bold tracking-wider sm:tracking-widest text-blm-red">TRANSMISSÕES</h2>
+        <p data-content-key="broadcast_description" class="text-lg text-white/85 leading-relaxed mt-6">
           Narração de corridas no Assetto Corsa Competizione, campeonatos e conteúdo pra comunidade evoluir.
         </p>
         <div class="mt-10 flex gap-3 flex-col sm:flex-row">
           <a href="https://www.youtube.com/@brasillegendsmotorsport" target="_blank"
              class="button">
-            <i class="fa-brands fa-youtube"></i> Abrir canal no YouTube
+            <i class="fa-brands fa-youtube"></i> <span data-content-key="broadcast_cta">Abrir canal no YouTube</span>
           </a>
         </div>
       </div>
@@ -639,12 +640,12 @@
       <div id="youtube" class="rounded-lg border border-white/10 bg-white/5 overflow-hidden scroll-animate min-w-0" data-animate="race-in">
         <div class="px-6 py-5 border-b border-white/10 flex items-center justify-between">
           <p class="font-semibold uppercase tracking-wider text-sm text-white/80">Canal — Brasil Legends Motorsport</p>
-          <a href="https://www.youtube.com/watch?v=LL2NUmtoEzA" target="_blank" class="text-sm text-white/70 hover:text-white">
+          <a id="broadcast-video-link" href="https://www.youtube.com/watch?v=LL2NUmtoEzA" target="_blank" class="text-sm text-white/70 hover:text-white">
             Abrir <i data-lucide="external-link" class="w-3 h-3 inline"></i>
           </a>
         </div>
         <div class="relative aspect-video w-full max-w-full bg-black overflow-hidden">
-          <iframe class="absolute inset-0 w-full h-full"
+          <iframe id="broadcast-iframe" class="absolute inset-0 w-full h-full"
             src="https://www.youtube.com/embed/LL2NUmtoEzA?start=31"
             title="Highlights | Brasil Challenge Amador | 7º Etapa - Mount Panorama | 18-10-25"
             frameborder="0"
@@ -659,8 +660,8 @@
   <section id="performance" class="py-24 px-4 border-t border-white/10">
     <div class="max-w-7xl mx-auto">
       <div class="mb-10 scroll-animate" data-animate="race-up">
-        <h2 class="font-racing text-2xl sm:text-3xl md:text-5xl font-bold tracking-wider sm:tracking-widest text-blm-red">BLM PERFORMANCE</h2>
-        <p class="text-lg text-white/80 mt-3 max-w-3xl">
+        <h2 data-content-key="performance_title" class="font-racing text-2xl sm:text-3xl md:text-5xl font-bold tracking-wider sm:tracking-widest text-blm-red">BLM PERFORMANCE</h2>
+        <p data-content-key="performance_subtitle" class="text-lg text-white/80 mt-3 max-w-3xl">
           Acompanhamento individual e privado para pilotos amadores do ACC. Não é curso, não é PDF, não é vídeo gravado —
           é acompanhamento real, feito sob medida.
         </p>
@@ -668,7 +669,7 @@
 
       <div class="grid lg:grid-cols-3 gap-6">
         <div class="rounded-lg border border-white/10 bg-white/5 p-6 scroll-animate" data-animate="race-up" data-delay="0">
-          <h3 class="font-racing text-xl font-bold uppercase">O que trabalhamos</h3>
+          <h3 data-content-key="performance_card1_title" class="font-racing text-xl font-bold uppercase">O que trabalhamos</h3>
           <ul class="mt-4 space-y-3 text-white/80">
             <li class="flex gap-3"><i data-lucide="wrench" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Configuração física (PC, cockpit, volante e pedais)</li>
             <li class="flex gap-3"><i data-lucide="sliders-horizontal" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Ajustes do ACC e do PC para melhor performance</li>
@@ -679,7 +680,7 @@
         </div>
 
         <div class="rounded-lg border border-white/10 bg-white/5 p-6 scroll-animate" data-animate="race-up" data-delay="100">
-          <h3 class="font-racing text-xl font-bold uppercase">Como funciona</h3>
+          <h3 data-content-key="performance_card2_title" class="font-racing text-xl font-bold uppercase">Como funciona</h3>
           <ul class="mt-4 space-y-3 text-white/80">
             <li class="flex gap-3"><i data-lucide="clock" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> 8 horas semanais (horário flexível)</li>
             <li class="flex gap-3"><i data-lucide="lock" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Aulas particulares e privadas</li>
@@ -689,14 +690,14 @@
           </ul>
 
           <div class="mt-6 pt-6 border-t border-white/10">
-            <p class="text-sm text-white/60">
+            <p data-content-key="performance_card2_footer" class="text-sm text-white/60">
               Investimento: você pode colocar aqui depois (ou deixar para fechar no Discord).
             </p>
           </div>
         </div>
 
         <div class="rounded-lg border border-white/10 bg-white/5 p-6 scroll-animate" data-animate="race-up" data-delay="200">
-          <h3 class="font-racing text-xl font-bold uppercase">Suporte exclusivo</h3>
+          <h3 data-content-key="performance_card3_title" class="font-racing text-xl font-bold uppercase">Suporte exclusivo</h3>
           <ul class="mt-4 space-y-3 text-white/80">
             <li class="flex gap-3"><i data-lucide="message-circle" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Sala reservada no Discord (horário comercial)</li>
             <li class="flex gap-3"><i data-lucide="badge" class="w-4 h-4 text-blm-red mt-1 shrink-0"></i> Cargo Performance</li>
@@ -705,7 +706,7 @@
 
           <a href="https://discord.gg/43ZtcMK3um" target="_blank"
              class="button mt-8 w-full justify-center">
-            <i class="fa-brands fa-discord"></i> Entrar para solicitar
+            <i class="fa-brands fa-discord"></i> <span data-content-key="performance_cta">Entrar para solicitar</span>
           </a>
         </div>
       </div>
@@ -716,20 +717,20 @@
   <section id="support" class="py-24 px-4 border-t border-white/10">
     <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-14 items-start">
       <div class="scroll-animate" data-animate="race-in">
-        <h2 class="font-racing text-2xl sm:text-3xl md:text-5xl font-bold tracking-wider sm:tracking-widest text-blm-red">APOIE A BLM</h2>
-        <p class="text-lg text-white/85 leading-relaxed mt-6">
+        <h2 data-content-key="support_title" class="font-racing text-2xl sm:text-3xl md:text-5xl font-bold tracking-wider sm:tracking-widest text-blm-red">APOIE A BLM</h2>
+        <p data-content-key="support_description" class="text-lg text-white/85 leading-relaxed mt-6">
           A BLM tem custo com server dedicado, administração das competições, transmissão das corridas e cuidados
           para que tudo funcione com o mínimo de paz para as atividades.
         </p>
 
         <div class="mt-8 rounded-lg border border-white/10 bg-white/5 p-6">
           <p class="text-sm uppercase tracking-wider text-white/60">PIX</p>
-          <p class="mt-2 text-white/90"><b>Chave:</b> familytechrio@gmail.com</p>
-          <p class="text-white/70"><b>Nome:</b> Luciano da Silva Neves</p>
+          <p class="mt-2 text-white/90"><b>Chave:</b> <span data-content-key="support_pix_key">familytechrio@gmail.com</span></p>
+          <p class="text-white/70"><b>Nome:</b> <span data-content-key="support_pix_name">Luciano da Silva Neves</span></p>
 
           <div class="mt-5 pt-5 border-t border-white/10">
             <p class="text-sm uppercase tracking-wider text-white/60">PayPal</p>
-            <p class="mt-2 text-white/90"><b>E-mail:</b> familytechrio@gmail.com</p>
+            <p class="mt-2 text-white/90"><b>E-mail:</b> <span data-content-key="support_paypal">familytechrio@gmail.com</span></p>
           </div>
         </div>
 
@@ -738,12 +739,12 @@
       <div class="rounded-lg border border-white/10 bg-white/5 p-6 scroll-animate flex flex-col items-center text-center" data-animate="race-in">
         <h3 class="font-racing text-2xl font-bold uppercase">QRCode PIX</h3>
         <div class="mt-5 rounded-lg border border-white/10 bg-white p-3 aspect-square max-w-[160px] flex items-center justify-center overflow-hidden mx-auto">
-          <img src="src/assets/img/pix.png" alt="QR Code PIX" class="w-full h-full object-contain">
+          <img data-content-key="support_qrcode_image" src="src/assets/img/pix.png" alt="QR Code PIX" class="w-full h-full object-contain">
         </div>
 
         <div class="mt-6 pt-6 border-t border-white/10 w-full text-left">
-          <h4 class="font-semibold uppercase tracking-wider text-sm text-white/70">Transparência</h4>
-          <p class="text-white/75 mt-2">
+          <h4 data-content-key="support_transparency_title" class="font-semibold uppercase tracking-wider text-sm text-white/70">Transparência</h4>
+          <p data-content-key="support_transparency_text" class="text-white/75 mt-2">
             O apoio ajuda a manter e melhorar tudo que existe hoje na BLM: servidores, organização, transmissão e evolução da comunidade.
           </p>
         </div>
@@ -754,7 +755,7 @@
   <!-- Footer -->
   <footer class="bg-blm-red border-t border-white/20 py-4 px-4">
     <div class="flex flex-wrap items-center justify-center gap-4 sm:gap-6">
-      <p class="text-white/90 text-sm">
+      <p id="footer-copyright" class="text-white/90 text-sm">
         © <span id="year"></span> BLM Brasil — Brasil Legends Motorsport. Todos os direitos reservados.
       </p>
       <div class="flex gap-4">
@@ -1044,6 +1045,71 @@
 
     // Inicializa ícones Lucide
     lucide.createIcons();
+
+    // Carregar conteúdo dinâmico do Supabase
+    (function() {
+      const url = window.SUPABASE_URL || 'https://bsnnvsdzwqdthrrubbko.supabase.co';
+      const key = window.SUPABASE_ANON_KEY;
+      if (!key) return;
+
+      fetch(url + '/rest/v1/site_content?select=key,value', {
+        headers: { 'apikey': key, 'Accept': 'application/json' }
+      })
+        .then(r => r.json())
+        .then(rows => {
+          const map = Object.fromEntries((rows || []).map(r => [r.key, r.value ?? '']));
+          document.querySelectorAll('[data-content-key]').forEach(el => {
+            const k = el.getAttribute('data-content-key');
+            const v = map[k];
+            if (v === undefined || v === null) return;
+            if (el.tagName === 'IMG') {
+              el.src = v;
+            } else if (el.tagName === 'IFRAME') {
+              if (k === 'broadcast_video_id') {
+                el.src = 'https://www.youtube.com/embed/' + v + '?start=31';
+                const link = document.getElementById('broadcast-video-link');
+                if (link) link.href = 'https://www.youtube.com/watch?v=' + v;
+              } else if (k === 'broadcast_video_title') {
+                el.title = v;
+              }
+            } else {
+              const text = String(v).replace(/\\n/g, '\n');
+              if (k === 'hero_title') {
+                el.innerHTML = text.replace(/\n/g, '<br class="hidden md:block">');
+              } else if (k === 'footer_copyright') {
+                el.textContent = text.replace('{year}', new Date().getFullYear());
+              } else {
+                el.textContent = text;
+              }
+            }
+          });
+          // Broadcast: vídeo e link são atualizados por ids separados, aplicar video_id e title
+          const vid = map.broadcast_video_id;
+          if (vid) {
+            const iframe = document.getElementById('broadcast-iframe');
+            const link = document.getElementById('broadcast-video-link');
+            if (iframe) iframe.src = 'https://www.youtube.com/embed/' + vid + '?start=31';
+            if (link) link.href = 'https://www.youtube.com/watch?v=' + vid;
+          }
+          if (map.broadcast_video_title) {
+            const iframe = document.getElementById('broadcast-iframe');
+            if (iframe) iframe.title = map.broadcast_video_title;
+          }
+          // Footer copyright
+          const footerTpl = map.footer_copyright;
+          if (footerTpl) {
+            const footer = document.getElementById('footer-copyright');
+            if (footer) footer.textContent = footerTpl.replace('{year}', new Date().getFullYear());
+          }
+          // Pista da semana (já tem id pista-da-semana-label)
+          const pista = map.ranking_pista_semana;
+          if (pista) {
+            const label = document.getElementById('pista-da-semana-label');
+            if (label) label.textContent = pista;
+          }
+        })
+        .catch(() => {});
+    })();
 
     // Preloader: mínimo 2 segundos, depois fade-out e inicia animações
     const preloaderStart = Date.now();
