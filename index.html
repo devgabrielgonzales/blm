@@ -831,8 +831,8 @@
     // Footer year
     document.getElementById('year').textContent = new Date().getFullYear();
 
-    // Ranking: local simulado (src/data/ranking.json) — sem CORS em dev
-    const RANKING_URL = 'src/data/ranking.json';
+    // Ranking: busca da API oficial
+    const RANKING_URL = 'https://www.brasillegendsmotorsport.com.br/ranking.json';
     const trackNames = {
       barcelona: 'Barcelona',
       brands_hatch: 'Brands Hatch',
