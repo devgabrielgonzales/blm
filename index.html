@@ -501,13 +501,14 @@
                     <th class="py-3 pr-4">Piloto</th>
                     <th class="py-3 pr-4">Categoria</th>
                     <th class="py-3 pr-4 tabular-nums text-right">Melhor volta</th>
+                    <th class="py-3 pr-4 tabular-nums text-right">Média limpa</th>
                     <th class="py-3 pr-4 tabular-nums text-right">Delta</th>
                     <th class="py-3 pr-4 tabular-nums text-right w-16">Voltas</th>
                   </tr>
                 </thead>
                 <tbody id="ranking-tbody" class="text-white/85">
                   <tr>
-                    <td colspan="6" class="py-8 text-center text-white/50">Carregando ranking…</td>
+                    <td colspan="7" class="py-8 text-center text-white/50">Carregando ranking…</td>
                   </tr>
                 </tbody>
               </table>
@@ -786,6 +787,7 @@
               <th class="py-3 pr-4">#</th>
               <th class="py-3 pr-4">Categoria</th>
               <th class="py-3 pr-4">Melhor volta</th>
+              <th class="py-3 pr-4">Média limpa</th>
               <th class="py-3 pr-4">Delta</th>
               <th class="py-3 pr-4">Voltas</th>
             </tr>
@@ -885,7 +887,7 @@
       const showVerMenos = rankingExpanded && filtered.length > RANKING_LIMIT_INITIAL;
 
       if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-white/50">Nenhum resultado</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-white/50">Nenhum resultado</td></tr>';
         if (verButtonsWrap) verButtonsWrap.classList.add('hidden');
         return;
       }
@@ -902,6 +904,7 @@
           <td class="py-4 pr-4">${nomeCell}</td>
           <td class="py-4 pr-4"><span class="px-2 py-1 rounded bg-white/10 border border-white/10 text-xs">${d.categoria || '—'}</span></td>
           <td class="py-4 pr-4 text-right tabular-nums font-mono text-sm">${d.melhor_volta || '—'}</td>
+          <td class="py-4 pr-4 text-right tabular-nums font-mono text-sm">${d.media_limpa || '—'}</td>
           <td class="py-4 pr-4 text-right tabular-nums font-mono text-sm text-white/70">${d.delta || '—'}</td>
           <td class="py-4 pr-4 text-right tabular-nums text-white/70">${d.voltas ?? '—'}</td>
         </tr>
@@ -925,7 +928,7 @@
       const trackKey = select?.value || PISTA_DA_SEMANA;
       updateTrackSelectionUI(trackKey);
       if (!trackKey || !rankingData?.pistas?.[trackKey]) {
-        document.getElementById('ranking-tbody').innerHTML = '<tr><td colspan="6" class="py-8 text-center text-white/50">Selecione uma pista para ver o ranking</td></tr>';
+        document.getElementById('ranking-tbody').innerHTML = '<tr><td colspan="7" class="py-8 text-center text-white/50">Selecione uma pista para ver o ranking</td></tr>';
         document.getElementById('ranking-ver-buttons')?.classList.add('hidden');
         return;
       }
@@ -1009,6 +1012,7 @@
             <td class="py-3 pr-4 text-right tabular-nums">${e.posicao}</td>
             <td class="py-3 pr-4"><span class="px-2 py-0.5 rounded bg-white/10 border border-white/10 text-xs">${e.categoria || '—'}</span></td>
             <td class="py-3 pr-4 text-right tabular-nums font-mono text-sm">${e.melhor_volta || '—'}</td>
+            <td class="py-3 pr-4 text-right tabular-nums font-mono text-sm">${e.media_limpa || '—'}</td>
             <td class="py-3 pr-4 text-right tabular-nums font-mono text-sm text-white/70">${e.delta || '—'}</td>
             <td class="py-3 pr-4 text-right tabular-nums text-white/70">${e.voltas ?? '—'}</td>
           </tr>
