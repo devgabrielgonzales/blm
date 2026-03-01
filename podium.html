@@ -1,0 +1,814 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pódio — BLM</title>
+  <script src="src/js/config.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="icon" type="image/png" href="src/assets/img/favicon/favicon-96x96.png" sizes="96x96" />
+  <link rel="shortcut icon" href="src/assets/img/favicon/favicon.ico" />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'blm-dark': '#000310',
+            'blm-black': '#0d0d0e',
+            'blm-red': '#fc0000',
+            'blm-pink': '#E62456',
+          },
+          fontFamily: {
+            racing: ['Orbitron', 'sans-serif'],
+            base: ['Rajdhani', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+  <style>
+    :root {
+      --blm-primary: #fc0000;
+      --blm-primary-soft: rgba(252, 0, 0, 0.22);
+      --blm-dark: #000310;
+      --blm-panel: rgba(7, 12, 26, 0.84);
+      --blm-line: rgba(252, 0, 0, 0.32);
+    }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background-color: var(--blm-dark);
+      background-image:
+        linear-gradient(120deg, rgba(7, 12, 24, 0.95), rgba(0, 3, 16, 0.95)),
+        radial-gradient(ellipse 65% 45% at 15% 15%, rgba(252, 0, 0, 0.18) 0%, transparent 62%),
+        radial-gradient(ellipse 50% 35% at 85% 80%, rgba(252, 0, 0, 0.14) 0%, transparent 68%),
+        repeating-linear-gradient(
+          -45deg,
+          rgba(255, 255, 255, 0.04) 0 12px,
+          rgba(255, 255, 255, 0) 12px 30px
+        );
+      background-attachment: fixed;
+    }
+
+    .font-racing { font-family: 'Orbitron', sans-serif; }
+
+    .podium-slide {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transform: translateY(14px) scale(0.985);
+      transition: opacity 0.45s ease, transform 0.45s ease;
+      pointer-events: none;
+    }
+
+    .podium-slide.active {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+
+    .race-shell {
+      position: relative;
+      width: 100%;
+      border: 1px solid var(--blm-line);
+      background: linear-gradient(155deg, rgba(12, 20, 38, 0.9), var(--blm-panel));
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+    }
+
+    .race-shell::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, transparent 0%, rgba(252, 0, 0, 0.08) 50%, transparent 100%),
+        repeating-linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.04) 0 2px,
+          rgba(255, 255, 255, 0) 2px 44px
+        );
+      pointer-events: none;
+    }
+
+    .race-tag {
+      border: 1px solid rgba(252, 0, 0, 0.44);
+      background: rgba(252, 0, 0, 0.16);
+      letter-spacing: 0.18em;
+    }
+
+    .telemetry-chip {
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .track-map {
+      background: linear-gradient(180deg, rgba(252, 0, 0, 0.26), rgba(252, 0, 0, 0.52));
+      box-shadow: 0 0 28px rgba(252, 0, 0, 0.35);
+    }
+
+    .pit-line {
+      height: 3px;
+      width: 100%;
+      border-radius: 999px;
+      background:
+        linear-gradient(90deg, rgba(252, 0, 0, 0.3), rgba(252, 0, 0, 0.95), rgba(252, 0, 0, 0.3));
+      box-shadow: 0 0 18px rgba(252, 0, 0, 0.45);
+    }
+
+    .podium-place {
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    .podium-place:hover {
+      transform: translateY(-3px);
+      border-color: rgba(252, 0, 0, 0.55);
+      box-shadow: 0 18px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    .podium-place-winner {
+      border-color: rgba(252, 0, 0, 0.62);
+      background:
+        linear-gradient(180deg, rgba(252, 0, 0, 0.34), rgba(252, 0, 0, 0.15));
+      box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.45),
+        0 0 30px rgba(252, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.16);
+    }
+
+    .podium-rank {
+      text-shadow: 0 0 18px rgba(252, 0, 0, 0.42);
+    }
+
+    .lane-highlight {
+      position: absolute;
+      inset: auto -30% 0 -30%;
+      height: 35%;
+      background: radial-gradient(circle at center bottom, rgba(252, 0, 0, 0.28), transparent 70%);
+      pointer-events: none;
+    }
+
+    .confetti-layer {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 80;
+      overflow: hidden;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      top: -12vh;
+      animation-name: confetti-fall;
+      animation-timing-function: cubic-bezier(.22, .92, .35, .99);
+      animation-fill-mode: forwards;
+      animation-duration: var(--dur, 1200ms);
+      animation-delay: var(--delay, 0ms);
+    }
+
+    @keyframes confetti-fall {
+      from {
+        transform: translate3d(0, -8vh, 0) rotate(0deg);
+        opacity: 0;
+      }
+      10% { opacity: 1; }
+      to {
+        transform: translate3d(var(--drift, 0), 110vh, 0) rotate(620deg);
+        opacity: 0;
+      }
+    }
+
+    .cat-amador { --cat-color: #94a3b8; }
+    .cat-silver { --cat-color: #eab308; }
+    .cat-pro { --cat-color: #3b82f6; }
+    .cat-legend { --cat-color: #a855f7; }
+  </style>
+</head>
+<body class="text-white min-h-screen antialiased">
+  <!-- Login -->
+  <div id="login-screen" class="min-h-screen flex items-center justify-center p-4">
+    <div class="rounded-2xl border border-white/10 bg-white/5 backdrop-blur p-8 w-full max-w-md">
+      <div class="text-center mb-6">
+        <img src="src/assets/img/logo-pequena.png" alt="BLM" class="h-14 w-auto mx-auto mb-4">
+        <h1 class="font-racing text-xl font-bold">Pódio — Ranking BLM</h1>
+        <p class="text-white/60 text-sm mt-1">Faça login para acessar a apresentação</p>
+      </div>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-white/70 mb-1">Email</label>
+          <input type="email" id="login-email" class="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-3 text-white" placeholder="seu@email.com" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-white/70 mb-1">Senha</label>
+          <input type="password" id="login-password" class="w-full bg-black/40 border border-white/20 rounded-lg px-4 py-3 text-white" placeholder="********" />
+        </div>
+        <p id="login-status" class="text-sm text-red-400 min-h-[1.25rem]"></p>
+        <button type="button" id="btn-login" class="w-full px-5 py-3 bg-blm-red hover:bg-blm-red/90 rounded-lg font-semibold transition font-racing">
+          Entrar
+        </button>
+      </div>
+      <p id="login-error-config" class="mt-4 text-sm text-amber-400 text-center hidden"></p>
+    </div>
+  </div>
+
+  <!-- Após login: tela com botão "Ver pódio" -->
+  <div id="app" class="min-h-screen hidden flex flex-col">
+    <div id="welcome-podium" class="flex-1 flex flex-col items-center justify-center p-8">
+      <div class="text-center max-w-md">
+        <img src="src/assets/img/logo-pequena.png" alt="BLM" class="h-16 w-auto mx-auto mb-6 opacity-90">
+        <h2 class="font-racing text-2xl font-bold text-white mb-2">Pódio — Ranking BLM</h2>
+        <p class="text-white/60 text-sm mb-8">Clique abaixo para abrir a apresentação. Use as setas para avançar.</p>
+        <button type="button" id="btn-ver-podium" class="w-full max-w-xs mx-auto px-8 py-4 bg-blm-red hover:bg-blm-red/90 rounded-xl font-racing font-bold text-lg transition flex items-center justify-center gap-3">
+          <i class="fa-solid fa-trophy text-2xl"></i> Ver pódio
+        </button>
+        <div class="mt-8 flex justify-center gap-4">
+          <a href="index.html" class="text-white/50 hover:text-white/80 text-sm">Site</a>
+          <button type="button" id="btn-logout" class="text-white/50 hover:text-white/80 text-sm">Sair</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Apresentação: viewport inteiro, tudo centralizado, setas para avançar -->
+    <div id="presentation" class="h-screen hidden flex flex-col overflow-hidden">
+      <header class="relative flex-shrink-0 flex items-center justify-between px-4 md:px-6 py-3 border-b border-blm-red/40 bg-black/65 backdrop-blur-md">
+        <div class="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-blm-red/70 to-transparent"></div>
+        <button type="button" id="btn-prev" class="p-2.5 rounded-xl telemetry-chip hover:bg-white/15 transition text-white/80 hover:text-white" aria-label="Anterior">
+          <i class="fa-solid fa-chevron-left text-lg"></i>
+        </button>
+        <span id="slide-counter" class="font-racing text-xs md:text-sm tracking-[0.24em] text-white/80">1 / 1</span>
+        <div class="flex items-center gap-2">
+          <button type="button" id="btn-next" class="p-2.5 rounded-xl telemetry-chip hover:bg-white/15 transition text-white/80 hover:text-white" aria-label="Próximo">
+            <i class="fa-solid fa-chevron-right text-lg"></i>
+          </button>
+          <a href="index.html" class="text-white/50 hover:text-white/80 text-xs ml-1 uppercase tracking-[0.16em]">Site</a>
+          <button type="button" id="btn-logout-presentation" class="text-white/50 hover:text-white/80 text-xs uppercase tracking-[0.16em]">Sair</button>
+        </div>
+      </header>
+
+      <main class="flex-1 min-h-0 flex items-center justify-center p-4 md:p-8 relative overflow-hidden">
+        <div class="absolute inset-0 pointer-events-none">
+          <div class="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(252,0,0,0.16),transparent_42%),radial-gradient(circle_at_84%_84%,rgba(252,0,0,0.11),transparent_44%)]"></div>
+          <div class="absolute inset-x-0 top-12 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent"></div>
+        </div>
+
+        <div id="race-suspense" class="hidden absolute inset-0 z-40 items-center justify-center">
+          <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+          <div class="relative z-10 w-full max-w-xl mx-auto px-6 text-center">
+            <img src="src/assets/img/logo-grande.png" alt="BLM" class="h-12 md:h-16 w-auto mx-auto mb-5 animate-pulse">
+            <p class="font-racing text-xl md:text-3xl text-white tracking-[0.2em] uppercase mb-2">Aquecendo os motores</p>
+            <p id="race-suspense-step" class="text-white/65 text-xs md:text-sm uppercase tracking-[0.3em] mb-6">Preparando grid...</p>
+            <div class="h-2 w-full rounded-full bg-white/15 overflow-hidden">
+              <div id="race-suspense-bar" class="h-full w-full bg-gradient-to-r from-blm-red/60 via-blm-red to-blm-red/60 origin-left scale-x-0 transition-transform duration-[1800ms] ease-out"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="race-finale" class="hidden absolute inset-0 z-30 items-center justify-center p-4 md:p-8">
+          <div class="absolute inset-0 bg-black/75 backdrop-blur-sm"></div>
+          <div class="relative z-10 w-full max-w-3xl mx-auto border border-blm-red/50 rounded-3xl bg-[linear-gradient(145deg,rgba(8,14,28,0.94),rgba(12,20,36,0.92))] p-6 md:p-10 shadow-[0_0_40px_rgba(252,0,0,0.25)]">
+            <div data-finale-motion="up" data-delay="0" class="opacity-0 translate-y-8 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] text-center">
+              <img src="src/assets/img/logo-grande.png" alt="BLM" class="h-12 md:h-16 w-auto mx-auto mb-4">
+              <p class="font-racing text-xs md:text-sm tracking-[0.28em] text-white/70 uppercase mb-2">Temporada encerrada</p>
+              <h3 class="font-racing text-3xl md:text-5xl text-white font-black tracking-wide uppercase">Parabéns a todos os pilotos</h3>
+              <p class="text-white/70 text-sm md:text-lg mt-4 max-w-2xl mx-auto">Obrigado por mais uma disputa intensa. Agora você pode voltar ao site ou seguir para o sorteio da próxima pista.</p>
+            </div>
+
+            <div data-finale-motion="up" data-delay="170" class="opacity-0 translate-y-8 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] mt-8 flex flex-col md:flex-row items-center justify-center gap-3 md:gap-4">
+              <a href="index.html" class="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 border border-white/25 text-white font-racing text-sm uppercase tracking-[0.12em] transition">
+                <i class="fa-solid fa-house"></i> Ir para o site
+              </a>
+              <a href="sorteador.html" class="w-full md:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blm-red hover:bg-blm-red/90 border border-blm-red/60 text-white font-racing text-sm uppercase tracking-[0.12em] transition shadow-[0_0_24px_rgba(252,0,0,0.35)]">
+                <i class="fa-solid fa-dice"></i> Fazer sorteio da pista
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div id="podium-slides" class="relative w-full max-w-[1400px] mx-auto h-full min-h-[380px] flex items-center justify-center">
+          <!-- slides injetados por JS -->
+        </div>
+
+        <button type="button" id="btn-prev-big" class="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 w-12 h-12 md:w-14 md:h-14 rounded-full bg-black/70 border border-white/20 flex items-center justify-center hover:bg-blm-red/80 hover:border-blm-red/70 transition opacity-90 hover:opacity-100 shadow-[0_0_20px_rgba(252,0,0,0.25)]" aria-label="Anterior">
+          <i class="fa-solid fa-chevron-left text-lg"></i>
+        </button>
+        <button type="button" id="btn-next-big" class="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 w-12 h-12 md:w-14 md:h-14 rounded-full bg-black/70 border border-white/20 flex items-center justify-center hover:bg-blm-red/80 hover:border-blm-red/70 transition opacity-90 hover:opacity-100 shadow-[0_0_20px_rgba(252,0,0,0.25)]" aria-label="Próximo">
+          <i class="fa-solid fa-chevron-right text-lg"></i>
+        </button>
+      </main>
+    </div>
+  </div>
+
+  <div id="confetti-layer" class="confetti-layer" aria-hidden="true"></div>
+
+  <script type="module">
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    const getClient = () => window.SUPABASE_ANON_KEY ? createClient('https://bsnnvsdzwqdthrrubbko.supabase.co', window.SUPABASE_ANON_KEY) : null;
+
+    const isLocalhost = /^localhost$|^127\.0\.0\.1$/i.test(window.location.hostname);
+    const RANKING_URL = isLocalhost ? 'ranking.json' : 'https://www.brasillegendsmotorsport.com.br/ranking.json';
+
+    const trackNames = {
+      barcelona: 'Barcelona',
+      brands_hatch: 'Brands Hatch',
+      cota: 'Circuit of the Americas',
+      donington: 'Donington',
+      hungaroring: 'Hungaroring',
+      imola: 'Imola',
+      kyalami: 'Kyalami',
+      misano: 'Misano',
+      monza: 'Monza',
+      mount_panorama: 'Mount Panorama',
+      nurburgring_24h: 'Nürburgring 24h',
+      nurburgring: 'Nürburgring GP',
+      oulton_park: 'Oulton Park',
+      paul_ricard: 'Paul Ricard',
+      red_bull_ring: 'Red Bull Ring',
+      silverstone: 'Silverstone',
+      spa: 'Spa-Francorchamps',
+      snetterton: 'Snetterton',
+      suzuka: 'Suzuka',
+      valencia: 'Valencia',
+      zandvoort: 'Zandvoort',
+      zolder: 'Zolder'
+    };
+
+    const CATEGORIAS_ORDEM = ['Amador', 'Silver', 'Pro', 'Legend'];
+    const TRACK_ICON_MAP = {
+      barcelona: 'barcelona-n.svg', brands_hatch: 'brands-hatch-n.svg', cota: 'cota.svg',
+      donington: 'donington.svg', hungaroring: 'hungaroring-n.svg', imola: 'imola.svg',
+      kyalami: 'kyalami.svg', misano: 'misano-n.svg', monza: 'monza-n.svg',
+      mount_panorama: 'bathurst.svg', nurburgring_24h: 'NBR24h-ok.svg', nurburgring: 'nurburgring-n.svg',
+      oulton_park: 'oulton.svg', paul_ricard: 'paul-ricard-n.svg', red_bull_ring: 'austria-n.svg',
+      silverstone: 'silverstone-n.svg', spa: 'spa-n.svg', snetterton: 'snetterton.svg',
+      suzuka: 'suzuka.svg', valencia: 'valencia.svg', zandvoort: 'zandvoort.svg', zolder: 'zolder-n.svg'
+    };
+
+    const PISTA_DA_SEMANA_DEFAULT = 'barcelona';
+
+    function normalizeCategoria(value) {
+      const raw = (value || '').toString().trim().toLowerCase();
+      if (raw === 'amador') return 'Amador';
+      if (raw === 'silver') return 'Silver';
+      if (raw === 'pro') return 'Pro';
+      if (raw === 'legend') return 'Legend';
+      return 'Amador';
+    }
+
+    function formatTrack(key) {
+      return trackNames[key] || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    }
+
+    /** Busca a pista da semana no Supabase; senão usa default. */
+    async function getPistaDaSemanaKey() {
+      const supabase = getClient();
+      if (!supabase) return PISTA_DA_SEMANA_DEFAULT;
+      const { data } = await supabase.from('site_content').select('value').eq('key', 'ranking_pista_key').maybeSingle();
+      const key = data?.value?.trim();
+      return (key && trackNames[key]) ? key : PISTA_DA_SEMANA_DEFAULT;
+    }
+
+    /** Apenas pista da semana: categorias Amador → Silver → Pro → Legend, top 3 por categoria. */
+    function buildSlides(rankingData, pistaKey) {
+      const slides = [];
+      if (!rankingData?.pistas?.[pistaKey]) return slides;
+
+      const drivers = rankingData.pistas[pistaKey];
+      const byCategory = {};
+      for (const d of drivers) {
+        const cat = normalizeCategoria(d.categoria);
+        if (!byCategory[cat]) byCategory[cat] = [];
+        byCategory[cat].push(d);
+      }
+
+      for (const cat of CATEGORIAS_ORDEM) {
+        const list = (byCategory[cat] || []).slice(0, 3);
+        if (list.length === 0) continue;
+        slides.push({
+          trackKey: pistaKey,
+          trackName: formatTrack(pistaKey),
+          categoria: cat,
+          podio: list
+        });
+      }
+      return slides;
+    }
+
+    let slides = [];
+    let currentIndex = 0;
+    let showingFinale = false;
+
+    function renderSlideContent(slide) {
+      const img = TRACK_ICON_MAP[slide.trackKey] || 'barcelona-n.svg';
+      const path = 'src/assets/img/pistas/' + img;
+      const trackMapHtml = `<div class="track-map mx-auto w-32 h-24 md:w-44 md:h-32 rounded-xl flex-shrink-0" style="mask-image:url('${path}');-webkit-mask-image:url('${path}');mask-size:contain;mask-repeat:no-repeat;mask-position:center;-webkit-mask-size:contain;-webkit-mask-repeat:no-repeat;-webkit-mask-position:center;"></div>`;
+
+      const places = [
+        { idx: 1, label: '2&ordm;', height: 'h-32 md:h-44', winner: false, delay: 260 },
+        { idx: 0, label: '1&ordm;', height: 'h-40 md:h-56', winner: true, delay: 340 },
+        { idx: 2, label: '3&ordm;', height: 'h-28 md:h-36', winner: false, delay: 420 }
+      ];
+
+      const podioHTML = places.map(({ idx, label, height, winner, delay }) => {
+        const pilot = slide.podio[idx];
+        const nome = pilot ? (pilot.nome || '&mdash;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : '&mdash;';
+        const tempo = pilot?.melhor_volta || '&mdash;';
+        return `
+          <div
+            data-motion="up"
+            data-delay="${delay}"
+            class="podium-place ${winner ? 'podium-place-winner' : ''} ${height} relative flex flex-col items-center justify-end rounded-t-3xl px-4 py-3 md:px-6 md:py-5 min-w-[130px] md:min-w-[220px] transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] opacity-0 translate-y-8"
+          >
+            <span class="podium-rank font-racing text-2xl md:text-4xl font-bold text-blm-red mb-1 md:mb-2">${label}</span>
+            <span class="font-semibold text-center text-sm md:text-2xl leading-tight w-full">${nome}</span>
+            <span class="text-white/70 text-xs md:text-base font-mono mt-1 md:mt-2">${tempo}</span>
+          </div>
+        `;
+      }).join('');
+
+      return `
+        <div class="relative w-full max-w-[1320px] px-1 md:px-4">
+          <div data-motion="up" data-delay="0" class="race-shell rounded-[2rem] p-5 md:p-10 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] opacity-0 translate-y-8 scale-95">
+            <div class="relative z-10 flex flex-col gap-6">
+              <div data-motion="up" data-delay="90" class="flex justify-center transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] opacity-0 translate-y-8">
+                <img src="src/assets/img/logo-grande.png" alt="BLM" class="h-10 md:h-14 w-auto mx-auto opacity-95">
+              </div>
+              <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div data-motion="left" data-delay="160" class="text-center md:text-left transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] opacity-0 -translate-x-8">
+                  <span class="race-tag inline-flex items-center px-3 py-1 rounded-full text-[10px] md:text-xs font-racing text-white/85 uppercase">Pista da semana</span>
+                  <h3 class="font-racing text-3xl md:text-5xl font-extrabold tracking-wide mt-3">${slide.trackName}</h3>
+                  <p class="text-white/70 text-base md:text-lg uppercase tracking-[0.22em] mt-1">${slide.categoria}</p>
+                </div>
+                <div data-motion="right" data-delay="220" class="flex flex-col items-center gap-2 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] opacity-0 translate-x-8">
+                  ${trackMapHtml}
+                  <span class="telemetry-chip rounded-full px-4 py-1.5 text-xs md:text-sm uppercase tracking-[0.22em] text-white/80">Ranking oficial BLM</span>
+                </div>
+              </div>
+              <div class="flex justify-center items-end gap-3 md:gap-9">
+                ${podioHTML}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+    function renderAllSlides() {
+      const container = document.getElementById('podium-slides');
+      if (!container || slides.length === 0) return;
+      hideFinale();
+      container.innerHTML = slides.map((s, i) =>
+        `<div class="podium-slide text-center ${i === currentIndex ? 'active' : ''}" data-slide-index="${i}">${renderSlideContent(s)}</div>`
+      ).join('');
+      updateCounter();
+      animateSlideEntrance(currentIndex);
+    }
+
+    function showSlide(index) {
+      if (index < 0 || index >= slides.length) return;
+      hideFinale();
+      currentIndex = index;
+      const container = document.getElementById('podium-slides');
+      if (!container) return;
+      container.querySelectorAll('.podium-slide').forEach((el, i) => {
+        el.classList.toggle('active', i === currentIndex);
+      });
+      updateCounter();
+      animateSlideEntrance(currentIndex);
+    }
+
+    function animateSlideEntrance(index) {
+      const container = document.getElementById('podium-slides');
+      if (!container) return;
+
+      const activeSlide = container.querySelector(`.podium-slide[data-slide-index="${index}"]`);
+      if (!activeSlide) return;
+
+      const motionItems = activeSlide.querySelectorAll('[data-motion]');
+      motionItems.forEach((item) => {
+        const motion = item.dataset.motion || 'up';
+        item.classList.remove('opacity-100', 'translate-y-0', 'translate-x-0', 'scale-100');
+        item.classList.add('opacity-0');
+
+        if (motion === 'left') item.classList.add('-translate-x-8');
+        if (motion === 'right') item.classList.add('translate-x-8');
+        if (motion === 'up') item.classList.add('translate-y-8');
+        if (motion === 'pop') item.classList.add('scale-95');
+      });
+
+      window.requestAnimationFrame(() => {
+        motionItems.forEach((item, idx) => {
+          const delay = Number(item.dataset.delay || (idx * 90));
+          window.setTimeout(() => {
+            item.classList.remove('opacity-0', '-translate-x-8', 'translate-x-8', 'translate-y-8', 'scale-95');
+            item.classList.add('opacity-100');
+          }, delay);
+        });
+      });
+    }
+
+    function animateFinaleEntrance() {
+      const finale = document.getElementById('race-finale');
+      if (!finale) return;
+      const items = finale.querySelectorAll('[data-finale-motion]');
+
+      items.forEach((item) => {
+        item.classList.remove('opacity-100');
+        item.classList.add('opacity-0', 'translate-y-8');
+      });
+
+      window.requestAnimationFrame(() => {
+        items.forEach((item, idx) => {
+          const delay = Number(item.dataset.delay || (idx * 120));
+          window.setTimeout(() => {
+            item.classList.remove('opacity-0', 'translate-y-8');
+            item.classList.add('opacity-100');
+          }, delay);
+        });
+      });
+    }
+
+    function showFinale() {
+      const finale = document.getElementById('race-finale');
+      if (!finale) return;
+      showingFinale = true;
+      finale.classList.remove('hidden');
+      finale.classList.add('flex');
+      updateCounter();
+      animateFinaleEntrance();
+      triggerPrimaryConfetti();
+    }
+
+    function hideFinale() {
+      const finale = document.getElementById('race-finale');
+      if (!finale) return;
+      showingFinale = false;
+      finale.classList.add('hidden');
+      finale.classList.remove('flex');
+      updateCounter();
+    }
+
+    function updateCounter() {
+      const el = document.getElementById('slide-counter');
+      if (!el) return;
+      if (showingFinale) {
+        el.textContent = `Final`;
+        return;
+      }
+      el.textContent = `${currentIndex + 1} / ${slides.length}`;
+    }
+
+    let confettiCleanupTimer = null;
+
+    function triggerPrimaryConfetti() {
+      const layer = document.getElementById('confetti-layer');
+      if (!layer) return;
+
+      layer.innerHTML = '';
+      const pieceCount = window.innerWidth < 768 ? 36 : 64;
+
+      for (let i = 0; i < pieceCount; i++) {
+        const piece = document.createElement('span');
+        piece.className = 'confetti-piece';
+
+        const size = Math.round(4 + Math.random() * 8);
+        const left = Math.random() * 100;
+        const drift = `${(Math.random() * 36 - 18).toFixed(2)}vw`;
+        const duration = 850 + Math.random() * 1100;
+        const delay = Math.random() * 160;
+        const alpha = 0.45 + Math.random() * 0.55;
+        const color = i % 2 === 0 ? '#fc0000' : `rgba(252, 0, 0, ${alpha.toFixed(2)})`;
+
+        piece.style.left = `${left}vw`;
+        piece.style.width = `${size}px`;
+        piece.style.height = `${Math.max(4, Math.round(size * 0.55))}px`;
+        piece.style.borderRadius = Math.random() > 0.5 ? '999px' : '3px';
+        piece.style.background = color;
+        piece.style.setProperty('--dur', `${duration.toFixed(0)}ms`);
+        piece.style.setProperty('--delay', `${delay.toFixed(0)}ms`);
+        piece.style.setProperty('--drift', drift);
+        layer.appendChild(piece);
+      }
+
+      if (confettiCleanupTimer) window.clearTimeout(confettiCleanupTimer);
+      confettiCleanupTimer = window.setTimeout(() => {
+        layer.innerHTML = '';
+      }, 2200);
+    }
+
+    let suspenseStepInterval = null;
+
+    function startSuspenseOverlay() {
+      const overlay = document.getElementById('race-suspense');
+      const stepEl = document.getElementById('race-suspense-step');
+      const barEl = document.getElementById('race-suspense-bar');
+      if (!overlay) return;
+
+      const steps = [
+        'Preparando grid...',
+        'Ajustando telemetria...',
+        'Sincronizando tempos...',
+        'Luzes em breve...'
+      ];
+
+      let stepIndex = 0;
+      if (stepEl) stepEl.textContent = steps[stepIndex];
+      if (suspenseStepInterval) window.clearInterval(suspenseStepInterval);
+      suspenseStepInterval = window.setInterval(() => {
+        stepIndex = (stepIndex + 1) % steps.length;
+        if (stepEl) stepEl.textContent = steps[stepIndex];
+      }, 420);
+
+      if (barEl) {
+        barEl.classList.remove('scale-x-100');
+        barEl.classList.add('scale-x-0');
+        window.requestAnimationFrame(() => {
+          window.requestAnimationFrame(() => {
+            barEl.classList.remove('scale-x-0');
+            barEl.classList.add('scale-x-100');
+          });
+        });
+      }
+
+      overlay.classList.remove('hidden');
+      overlay.classList.add('flex');
+    }
+
+    function stopSuspenseOverlay() {
+      const overlay = document.getElementById('race-suspense');
+      if (suspenseStepInterval) {
+        window.clearInterval(suspenseStepInterval);
+        suspenseStepInterval = null;
+      }
+      if (!overlay) return;
+      overlay.classList.add('hidden');
+      overlay.classList.remove('flex');
+    }
+
+    function wait(ms) {
+      return new Promise((resolve) => window.setTimeout(resolve, ms));
+    }
+
+    function goPrev() {
+      if (showingFinale) {
+        hideFinale();
+        return;
+      }
+      if (currentIndex > 0) {
+        showSlide(currentIndex - 1);
+        triggerPrimaryConfetti();
+      }
+    }
+
+    function goNext() {
+      if (showingFinale) return;
+      if (currentIndex < slides.length - 1) {
+        showSlide(currentIndex + 1);
+        triggerPrimaryConfetti();
+        return;
+      }
+      if (slides.length > 0) showFinale();
+    }
+
+    document.getElementById('btn-prev')?.addEventListener('click', goPrev);
+    document.getElementById('btn-next')?.addEventListener('click', goNext);
+    document.getElementById('btn-prev-big')?.addEventListener('click', goPrev);
+    document.getElementById('btn-next-big')?.addEventListener('click', goNext);
+
+    document.addEventListener('keydown', (e) => {
+      const presentation = document.getElementById('presentation');
+      if (!presentation || presentation.classList.contains('hidden')) return;
+      if (e.key === 'ArrowLeft') goPrev();
+      if (e.key === 'ArrowRight') goNext();
+    });
+
+    function logout() {
+      getClient()?.auth.signOut();
+      document.getElementById('app').classList.add('hidden');
+      document.getElementById('presentation').classList.add('hidden');
+      document.getElementById('welcome-podium').classList.remove('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+    }
+
+    document.getElementById('btn-logout')?.addEventListener('click', logout);
+    document.getElementById('btn-logout-presentation')?.addEventListener('click', logout);
+
+    document.getElementById('btn-login')?.addEventListener('click', async () => {
+      const supabase = getClient();
+      const statusEl = document.getElementById('login-status');
+      const configEl = document.getElementById('login-error-config');
+      configEl?.classList.add('hidden');
+      if (!supabase) {
+        if (configEl) {
+          configEl.textContent = 'Edite src/js/config.js com a chave Supabase.';
+          configEl.classList.remove('hidden');
+        }
+        return;
+      }
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-password').value;
+      if (!email || !pass) { statusEl.textContent = 'Preencha email e senha.'; return; }
+      statusEl.textContent = 'Entrando...';
+      const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+      if (error) {
+        statusEl.textContent = error.message === 'Invalid login credentials' ? 'Email ou senha incorretos.' : error.message;
+        return;
+      }
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('app').classList.remove('hidden');
+      document.getElementById('welcome-podium').classList.remove('hidden');
+      document.getElementById('presentation').classList.add('hidden');
+    });
+
+    document.getElementById('login-password')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('btn-login').click();
+    });
+
+    async function loadRankingAndRender() {
+      const btn = document.getElementById('btn-ver-podium');
+      const welcomeEl = document.getElementById('welcome-podium');
+      const presentationEl = document.getElementById('presentation');
+      const slidesEl = document.getElementById('podium-slides');
+      const counterEl = document.getElementById('slide-counter');
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Aquecendo...';
+      }
+
+      welcomeEl?.classList.add('hidden');
+      presentationEl?.classList.remove('hidden');
+      presentationEl?.classList.add('flex');
+      if (slidesEl) slidesEl.innerHTML = '';
+      hideFinale();
+
+      startSuspenseOverlay();
+      const suspenseMinDelay = wait(1800);
+
+      try {
+        const [pistaKey, data] = await Promise.all([
+          getPistaDaSemanaKey(),
+          fetch(RANKING_URL).then((res) => res.json())
+        ]);
+        slides = buildSlides(data, pistaKey);
+
+        await suspenseMinDelay;
+        stopSuspenseOverlay();
+
+        if (slides.length === 0) {
+          if (slidesEl) slidesEl.innerHTML = '<p class="text-center text-white/60">Nenhum dado de ranking para a pista da semana.</p>';
+          if (counterEl) counterEl.textContent = '0 / 0';
+          return;
+        }
+
+        currentIndex = 0;
+        renderAllSlides();
+        window.setTimeout(() => {
+          triggerPrimaryConfetti();
+        }, 120);
+      } catch {
+        await suspenseMinDelay;
+        stopSuspenseOverlay();
+        if (slidesEl) slidesEl.innerHTML = '<p class="text-center text-red-400">Erro ao carregar ranking.json</p>';
+        if (counterEl) counterEl.textContent = '0 / 0';
+      } finally {
+        stopSuspenseOverlay();
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-trophy text-2xl"></i> Ver pódio';
+        }
+      }
+    }
+
+    document.getElementById('btn-ver-podium')?.addEventListener('click', loadRankingAndRender);
+
+    (async function init() {
+      if (!window.SUPABASE_ANON_KEY) {
+        const configEl = document.getElementById('login-error-config');
+        if (configEl) {
+          configEl.textContent = 'Edite src/js/config.js com a chave Supabase.';
+          configEl.classList.remove('hidden');
+        }
+        return;
+      }
+      const supabase = getClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        document.getElementById('login-screen').classList.add('hidden');
+        document.getElementById('app').classList.remove('hidden');
+        document.getElementById('welcome-podium').classList.remove('hidden');
+        document.getElementById('presentation').classList.add('hidden');
+      }
+    })();
+  </script>
+</body>
+</html>
+
+
+
