@@ -156,27 +156,30 @@
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
     const getClient = () => window.SUPABASE_ANON_KEY ? createClient('https://bsnnvsdzwqdthrrubbko.supabase.co', window.SUPABASE_ANON_KEY) : null;
 
+    // IDs do servidor para buscar resultado; nomes de exibição conforme lista oficial
     const TRACKS = [
       { key: 'barcelona', name: 'Barcelona', img: 'barcelona-n.svg' },
       { key: 'brands_hatch', name: 'Brands Hatch', img: 'brands-hatch-n.svg' },
       { key: 'cota', name: 'Circuit of the Americas', img: 'cota.svg' },
-      { key: 'donington', name: 'Donington', img: 'donington.svg' },
+      { key: 'donington', name: 'Donington Park', img: 'donington.svg' },
       { key: 'hungaroring', name: 'Hungaroring', img: 'hungaroring-n.svg' },
       { key: 'imola', name: 'Imola', img: 'imola.svg' },
+      { key: 'indianapolis', name: 'Indianapolis', img: 'indi.svg' },
       { key: 'kyalami', name: 'Kyalami', img: 'kyalami.svg' },
+      { key: 'laguna_seca', name: 'Laguna Seca', img: 'laguna.svg' },
       { key: 'misano', name: 'Misano', img: 'misano-n.svg' },
       { key: 'monza', name: 'Monza', img: 'monza-n.svg' },
-      { key: 'mount_panorama', name: 'Mount Panorama', img: 'bathurst.svg' },
-      { key: 'nurburgring_24h', name: 'Nürburgring 24h', img: 'NBR24h-ok.svg' },
-      { key: 'nurburgring', name: 'Nürburgring GP', img: 'nurburgring-n.svg' },
+      { key: 'mount_panorama', name: 'Mount Panorama (Bathurst)', img: 'bathurst.svg' },
+      { key: 'nurburgring', name: 'Nürburgring', img: 'nurburgring-n.svg' },
       { key: 'oulton_park', name: 'Oulton Park', img: 'oulton.svg' },
       { key: 'paul_ricard', name: 'Paul Ricard', img: 'paul-ricard-n.svg' },
       { key: 'red_bull_ring', name: 'Red Bull Ring', img: 'austria-n.svg' },
       { key: 'silverstone', name: 'Silverstone', img: 'silverstone-n.svg' },
-      { key: 'spa', name: 'Spa-Francorchamps', img: 'spa-n.svg' },
       { key: 'snetterton', name: 'Snetterton', img: 'snetterton.svg' },
+      { key: 'spa', name: 'Spa-Francorchamps', img: 'spa-n.svg' },
       { key: 'suzuka', name: 'Suzuka', img: 'suzuka.svg' },
       { key: 'valencia', name: 'Valencia', img: 'valencia.svg' },
+      { key: 'watkins_glen', name: 'Watkins Glen', img: 'watkins.svg' },
       { key: 'zandvoort', name: 'Zandvoort', img: 'zandvoort.svg' },
       { key: 'zolder', name: 'Zolder', img: 'zolder-n.svg' },
     ];
