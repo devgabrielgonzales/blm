@@ -190,6 +190,15 @@
     .cat-silver { --cat-color: #eab308; }
     .cat-pro { --cat-color: #3b82f6; }
     .cat-legend { --cat-color: #a855f7; }
+
+    .track-card {
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .track-card:hover { transform: scale(1.03); }
+    .track-card.selected { box-shadow: 0 0 0 3px #fc0000; }
+    .track-card .check { opacity: 0; transition: opacity 0.2s; }
+    .track-card.selected .check { opacity: 1; }
   </style>
 </head>
 <body class="text-white min-h-screen antialiased">
@@ -219,19 +228,30 @@
     </div>
   </div>
 
-  <!-- Após login: tela com botão "Ver pódio" -->
+  <!-- Após login: escolher pista e depois ver pódio -->
   <div id="app" class="min-h-screen hidden flex flex-col">
-    <div id="welcome-podium" class="flex-1 flex flex-col items-center justify-center p-8">
-      <div class="text-center max-w-md">
-        <img src="src/assets/img/logo-pequena.png" alt="BLM" class="h-16 w-auto mx-auto mb-6 opacity-90">
-        <h2 class="font-racing text-2xl font-bold text-white mb-2">Pódio — Ranking BLM</h2>
-        <p class="text-white/60 text-sm mb-8">Clique abaixo para abrir a apresentação. Use as setas para avançar.</p>
-        <button type="button" id="btn-ver-podium" class="w-full max-w-xs mx-auto px-8 py-4 bg-blm-red hover:bg-blm-red/90 rounded-xl font-racing font-bold text-lg transition flex items-center justify-center gap-3">
-          <i class="fa-solid fa-trophy text-2xl"></i> Ver pódio
-        </button>
-        <div class="mt-8 flex justify-center gap-4">
-          <a href="index.html" class="text-white/50 hover:text-white/80 text-sm">Site</a>
-          <button type="button" id="btn-logout" class="text-white/50 hover:text-white/80 text-sm">Sair</button>
+    <div id="welcome-podium" class="flex-1 flex flex-col p-6 md:p-8">
+      <div class="max-w-6xl mx-auto w-full">
+        <div class="text-center mb-6">
+          <img src="src/assets/img/logo-pequena.png" alt="BLM" class="h-14 w-auto mx-auto mb-4 opacity-90">
+          <h2 class="font-racing text-2xl font-bold text-white mb-2">Pódio — Ranking BLM</h2>
+          <p class="text-white/70 mb-2">Clique na pista para selecionar. Depois clique em Ver pódio.</p>
+          <p id="podium-selected-track" class="text-blm-red font-semibold min-h-[1.5rem]">Nenhuma pista selecionada</p>
+        </div>
+
+        <div id="track-grid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 mb-8">
+          <!-- preenchido por JS -->
+        </div>
+
+        <div class="flex flex-col items-center gap-4">
+          <button type="button" id="btn-ver-podium" disabled
+            class="px-8 py-4 bg-blm-red hover:bg-blm-red/90 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl font-racing font-bold text-lg transition flex items-center justify-center gap-3">
+            <i class="fa-solid fa-trophy text-2xl"></i> Ver pódio
+          </button>
+          <div class="flex justify-center gap-4">
+            <a href="index.html" class="text-white/50 hover:text-white/80 text-sm">Site</a>
+            <button type="button" id="btn-logout" class="text-white/50 hover:text-white/80 text-sm">Sair</button>
+          </div>
         </div>
       </div>
     </div>
@@ -343,6 +363,38 @@
       zolder: 'Zolder'
     };
 
+    /** Lista de pistas para a grid de escolha (mesmo layout do sorteador). */
+    const TRACKS = [
+      { key: 'barcelona', name: 'Barcelona', img: 'barcelona-n.svg' },
+      { key: 'brands_hatch', name: 'Brands Hatch', img: 'brands-hatch-n.svg' },
+      { key: 'cota', name: 'Circuit of the Americas', img: 'cota.svg' },
+      { key: 'donington', name: 'Donington Park', img: 'donington.svg' },
+      { key: 'hungaroring', name: 'Hungaroring', img: 'hungaroring-n.svg' },
+      { key: 'imola', name: 'Imola', img: 'imola.svg' },
+      { key: 'indianapolis', name: 'Indianapolis', img: 'indi.svg' },
+      { key: 'kyalami', name: 'Kyalami', img: 'kyalami.svg' },
+      { key: 'laguna_seca', name: 'Laguna Seca', img: 'laguna.svg' },
+      { key: 'misano', name: 'Misano', img: 'misano-n.svg' },
+      { key: 'monza', name: 'Monza', img: 'monza-n.svg' },
+      { key: 'mount_panorama', name: 'Mount Panorama (Bathurst)', img: 'bathurst.svg' },
+      { key: 'nurburgring', name: 'Nürburgring', img: 'nurburgring-n.svg' },
+      { key: 'nurburgring_24h', name: 'Nürburgring Nordschleife 24h', img: 'NBR24h-ok.svg' },
+      { key: 'oulton_park', name: 'Oulton Park', img: 'oulton.svg' },
+      { key: 'paul_ricard', name: 'Paul Ricard', img: 'paul-ricard-n.svg' },
+      { key: 'red_bull_ring', name: 'Red Bull Ring', img: 'austria-n.svg' },
+      { key: 'silverstone', name: 'Silverstone', img: 'silverstone-n.svg' },
+      { key: 'snetterton', name: 'Snetterton', img: 'snetterton.svg' },
+      { key: 'spa', name: 'Spa-Francorchamps', img: 'spa-n.svg' },
+      { key: 'suzuka', name: 'Suzuka', img: 'suzuka.svg' },
+      { key: 'valencia', name: 'Valencia', img: 'valencia.svg' },
+      { key: 'watkins_glen', name: 'Watkins Glen', img: 'watkins.svg' },
+      { key: 'zandvoort', name: 'Zandvoort', img: 'zandvoort.svg' },
+      { key: 'zolder', name: 'Zolder', img: 'zolder-n.svg' },
+    ];
+
+    /** Pista selecionada para exibir o pódio (uma única). */
+    let selectedPistaKey = null;
+
     const CATEGORIAS_ORDEM = ['Amador', 'Silver', 'Pro', 'Legend'];
     const TRACK_ICON_MAP = {
       barcelona: 'barcelona-n.svg', brands_hatch: 'brands-hatch-n.svg', cota: 'cota.svg',
@@ -378,6 +430,43 @@
       const { data } = await supabase.from('site_content').select('value').eq('key', 'ranking_pista_key').maybeSingle();
       const key = data?.value?.trim();
       return (key && trackNames[key]) ? key : PISTA_DA_SEMANA_DEFAULT;
+    }
+
+    /** Renderiza a grid de pistas para escolha (seleção única, mesmo layout do sorteador). */
+    function renderTrackGrid() {
+      const grid = document.getElementById('track-grid');
+      const labelEl = document.getElementById('podium-selected-track');
+      const btnEl = document.getElementById('btn-ver-podium');
+      if (!grid) return;
+
+      grid.innerHTML = TRACKS.map((t) => {
+        const sel = selectedPistaKey === t.key;
+        const imgPath = `src/assets/img/pistas/${t.img}`;
+        return `
+          <div class="track-card rounded-xl border-2 overflow-hidden ${sel ? 'selected border-blm-red bg-blm-red/10' : 'border-white/10 bg-white/5'}"
+               data-key="${t.key}" data-name="${t.name}" data-img="${imgPath}">
+            <div class="relative aspect-[4/3] flex items-center justify-center p-2">
+              <div class="w-full h-full bg-blm-red/80 rounded-lg flex items-center justify-center" style="mask-image:url('${imgPath}');-webkit-mask-image:url('${imgPath}');mask-size:contain;mask-repeat:no-repeat;mask-position:center;"></div>
+              <div class="check absolute top-2 right-2 w-8 h-8 rounded-full bg-blm-red flex items-center justify-center">
+                <i class="fa-solid fa-check text-white text-sm"></i>
+              </div>
+            </div>
+            <p class="text-center py-2 text-sm font-medium truncate px-1">${t.name}</p>
+          </div>
+        `;
+      }).join('');
+
+      grid.querySelectorAll('.track-card').forEach((card) => {
+        card.addEventListener('click', () => {
+          selectedPistaKey = card.dataset.key;
+          renderTrackGrid();
+          if (labelEl) labelEl.textContent = TRACKS.find((x) => x.key === selectedPistaKey)?.name || selectedPistaKey;
+          if (btnEl) btnEl.disabled = !selectedPistaKey;
+        });
+      });
+
+      if (labelEl) labelEl.textContent = selectedPistaKey ? (TRACKS.find((x) => x.key === selectedPistaKey)?.name || selectedPistaKey) : 'Nenhuma pista selecionada';
+      if (btnEl) btnEl.disabled = !selectedPistaKey;
     }
 
     /** Apenas pista da semana: categorias Amador → Silver → Pro → Legend, top 3 por categoria. */
@@ -729,6 +818,7 @@
       document.getElementById('app').classList.remove('hidden');
       document.getElementById('welcome-podium').classList.remove('hidden');
       document.getElementById('presentation').classList.add('hidden');
+      renderTrackGrid();
     });
 
     document.getElementById('login-password')?.addEventListener('keydown', (e) => {
@@ -736,6 +826,7 @@
     });
 
     async function loadRankingAndRender() {
+      const pistaKey = selectedPistaKey || (await getPistaDaSemanaKey());
       const btn = document.getElementById('btn-ver-podium');
       const welcomeEl = document.getElementById('welcome-podium');
       const presentationEl = document.getElementById('presentation');
@@ -757,10 +848,7 @@
       const suspenseMinDelay = wait(1800);
 
       try {
-        const [pistaKey, data] = await Promise.all([
-          getPistaDaSemanaKey(),
-          fetch(RANKING_URL).then((res) => res.json())
-        ]);
+        const data = await fetch(RANKING_URL).then((res) => res.json());
         slides = buildSlides(data, pistaKey);
 
         await suspenseMinDelay;
@@ -809,6 +897,7 @@
         document.getElementById('app').classList.remove('hidden');
         document.getElementById('welcome-podium').classList.remove('hidden');
         document.getElementById('presentation').classList.add('hidden');
+        renderTrackGrid();
       }
     })();
   </script>
