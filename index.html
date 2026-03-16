@@ -952,10 +952,23 @@
     }
 
     const PISTA_DA_SEMANA = 'barcelona';
+    let _rankingPopulated = false;
 
     function updateTrackSelectionUI(trackKey) {
       const label = document.getElementById('pista-da-semana-label');
       if (label) label.textContent = 'Pista da semana: ' + formatTrack(trackKey);
+    }
+
+    // Aplica a pista da semana no dropdown — chamada por ambos os fetches
+    function applyPistaDaSemana() {
+      const pistaKey = (window._pistaDaSemanaKey || '').trim();
+      if (!pistaKey || !_rankingPopulated || !rankingData) return;
+      const sel = document.getElementById('ranking-track');
+      if (!sel) return;
+      if (sel.querySelector('option[value="' + pistaKey + '"]')) {
+        sel.value = pistaKey;
+        onTrackChange(!!window._rankingExpanded);
+      }
     }
 
     function onTrackChange(expanded = false) {
@@ -963,8 +976,13 @@
       const search = document.getElementById('ranking-search');
       const trackKey = select?.value || PISTA_DA_SEMANA;
       updateTrackSelectionUI(trackKey);
-      if (!trackKey || !rankingData?.pistas?.[trackKey]) {
+      if (!trackKey) {
         document.getElementById('ranking-tbody').innerHTML = '<tr><td colspan="7" class="py-8 text-center text-white/50">Selecione uma pista para ver o ranking</td></tr>';
+        document.getElementById('ranking-ver-buttons')?.classList.add('hidden');
+        return;
+      }
+      if (!rankingData?.pistas?.[trackKey]) {
+        document.getElementById('ranking-tbody').innerHTML = '<tr><td colspan="7" class="py-8 text-center text-white/50">Nenhum dado de ranking disponível para esta pista</td></tr>';
         document.getElementById('ranking-ver-buttons')?.classList.add('hidden');
         return;
       }
@@ -980,17 +998,18 @@
         if (el && data?.atualizado_em) el.textContent = 'Atualizado: ' + data.atualizado_em;
 
         const select = document.getElementById('ranking-track');
-        if (select && data?.pistas) {
-          Object.keys(data.pistas).sort().forEach(key => {
+        if (select) {
+          Object.keys(trackNames).sort((a, b) => trackNames[a].localeCompare(trackNames[b])).forEach(key => {
             const opt = document.createElement('option');
             opt.value = key;
             opt.textContent = formatTrack(key);
             select.appendChild(opt);
           });
-          const defaultKey = window._pistaDaSemanaKey || PISTA_DA_SEMANA;
-          const chosen = data.pistas[defaultKey] ? defaultKey : Object.keys(data.pistas)[0];
-          select.value = chosen;
-          if (data?.pistas?.[chosen]) onTrackChange(false);
+          _rankingPopulated = true;
+          const pistaKey = (window._pistaDaSemanaKey || '').trim();
+          const defaultKey = pistaKey || PISTA_DA_SEMANA;
+          select.value = defaultKey;
+          onTrackChange(false);
         }
       })
       .catch(() => {
@@ -1186,11 +1205,7 @@
               icon.title = pista || ('Pista da semana');
             }
             window._pistaDaSemanaKey = pistaKey;
-            const sel = document.getElementById('ranking-track');
-            if (sel && sel.options.length > 0 && sel.querySelector('option[value="' + pistaKey + '"]')) {
-              sel.value = pistaKey;
-              if (typeof onTrackChange === 'function') onTrackChange(!!window._rankingExpanded);
-            }
+            applyPistaDaSemana();
           }
         })
         .catch(() => {});
